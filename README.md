@@ -95,23 +95,22 @@ grunt cmiscopy:path:upload
 ```
 grunt cmiscopy:pages
 ```
-will download `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages` folder with it's sub-folders to local 
-`src/webapp/pages`
+will download `$cmisRoot/pages` folder with it's sub-folders to `$localRoot/pages`
 
 ```
 grunt cmiscopy:pages:upload
 ```
-will upload local `src/webapp/pages` to CMS `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages`
+will upload local `$localRoot/pages` to CMS `$cmisRoot/pages`
 
 ```
 grunt cmiscopy:pages/faq.html
 ```
-will download `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages/faq.html` file to local `src/webapp/pages/faq.html`
+will download `$cmisRoot/pages/faq.html` file to local `$localRoot/pages/faq.html`
 
 ```
 grunt cmiscopy:pages/faq.html:upload
 ```
-will upload local `src/webapp/pages/faq.html` to `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages/faq.html`
+will upload local `$localRoot/pages/faq.html` to `$cmisRoot/pages/faq.html`
 
 ### Limitations:
 - it will not create new content in CMS
