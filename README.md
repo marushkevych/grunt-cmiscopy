@@ -77,10 +77,19 @@ where
 - `action` is an action flag. Currently only 'upload' action flag is supported. (default is 'download'). 
 
 If no parameters provided it will download all content of root folder to local project:
-`grunt cmiscopy`  
+```
+grunt cmiscopy
+```  
 
-`grunt cmiscopy:path`           - will download file or entire folder from CMS to local project
-`grunt cmiscopy:path:upload`    - will upload file or entire folder to CMS
+This will download file or entire folder from CMS to local project:
+```
+grunt cmiscopy:path
+```
+
+This will upload file or entire folder to CMS
+```
+grunt cmiscopy:path:upload
+```
 
 #### Concrete examples
 ```
