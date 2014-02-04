@@ -1,7 +1,7 @@
 # grunt-cmiscopy
 
 > Copy files and folders to and from CMS.
-This plugin wraps CmisJS library to provide an easy way to access content in Content Management Systems like Alfresco.
+This plugin wraps [CmisJS](https://npmjs.org/package/cmis) library to provide an easy way to access content in Content Management Systems like Alfresco.
 It can be used to author content (download - edit - upload), or to use in automated tests to dynamically download content.
 
 ## Getting Started
@@ -101,7 +101,7 @@ will upload local `src/webapp/pages/faq.html` to `/Sites/sitename/documentLibrar
 - it will not delete anything
 
 ### TODO:
-- support for checkout,  checkin
+- support for 'checkout' and 'checkin' actions
 - creating new content in CMS
 
 
