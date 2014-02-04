@@ -83,17 +83,25 @@ If no parameters provided it will download all content of root folder to local p
 `grunt cmiscopy:path:upload`    - will upload file or entire folder to CMS
 
 #### Concrete examples
-```grunt cmiscopy:pages```
+```
+grunt cmiscopy:pages
+```
 will download `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages` folder with it's sub-folders to local 
 `src/webapp/pages`
 
-```grunt cmiscopy:pages:upload```
+```
+grunt cmiscopy:pages:upload
+```
 will upload local `src/webapp/pages` to CMS `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages`
 
-```grunt cmiscopy:pages/faq.html```
+```
+grunt cmiscopy:pages/faq.html
+```
 will download `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages/faq.html` file to local `src/webapp/pages/faq.html`
 
-```grunt cmiscopy:pages/faq.html:upload```
+```
+grunt cmiscopy:pages/faq.html:upload
+```
 will upload local `src/webapp/pages/faq.html` to `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages/faq.html`
 
 ### Limitations:
