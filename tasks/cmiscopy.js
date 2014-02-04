@@ -203,8 +203,3 @@ module.exports = function(grunt) {
         }
     });
 };
-
-function removeTrailingSlash(path) {
-    return path.charAt(path.length - 1) === '/' ? path.substring(0, path.length - 1) : path;
-}
-
