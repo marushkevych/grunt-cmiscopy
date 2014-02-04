@@ -15,12 +15,16 @@ module.exports = function(grunt) {
     var http = require('http');
     var url = require('url');
     var fs = require('fs');
+    
+    function removeTrailingSlash(path) {
+        return path.charAt(path.length - 1) === '/' ? path.substring(0, path.length - 1) : path;
+    }
 
     grunt.registerTask('cmiscopy', 'copy files and folders to and from CMS', function(specificPath, action) {
         // derive action
         var isUpload = false;
         if(action){
-            if(action == 'upload'){
+            if(action === 'upload'){
                 isUpload = true;
             } else {
                 grunt.log.error('action', action, 'is not supported');
@@ -84,7 +88,7 @@ module.exports = function(grunt) {
                 // find file object in collection
                 var fileProps;
                 collection.objects.forEach(function(entry) {
-                    if (entry.object.properties["cmis:name"].value == fileName) {
+                    if (entry.object.properties["cmis:name"].value === fileName) {
                         fileProps = entry.object.properties;
                     }
                 });
@@ -105,7 +109,7 @@ module.exports = function(grunt) {
         // create function to run with async.parallel()
         function createTask(parentPath, nodeProps) {
             return function(callback) {
-                if (nodeProps["cmis:baseTypeId"].value == 'cmis:folder') {
+                if (nodeProps["cmis:baseTypeId"].value === 'cmis:folder') {
                     // get collection
                     session.getObject(nodeProps['cmis:objectId'].value).ok(function(collection) {
                         processFolder(nodeProps['cmis:path'].value, collection, callback);
@@ -176,7 +180,7 @@ module.exports = function(grunt) {
             var requestOptions = url.parse(URL);
             requestOptions.auth = options.username + ':' + options.password;
             http.get(requestOptions, function(response) {
-                if (response.statusCode != 200) {
+                if (response.statusCode !== 200) {
                     grunt.log.error(response.statusCode, filePath);
                     callback(response);
                 } else {
@@ -201,6 +205,6 @@ module.exports = function(grunt) {
 };
 
 function removeTrailingSlash(path) {
-    return path.charAt(path.length - 1) == '/' ? path.substring(0, path.length - 1) : path;
+    return path.charAt(path.length - 1) === '/' ? path.substring(0, path.length - 1) : path;
 }
 
