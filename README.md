@@ -1,6 +1,8 @@
 # grunt-cmiscopy
 
 > copy files and folders to and from CMS
+This plugin wraps CmisJS library to provide easy way to access content in Content Management Systems like Alfresco.
+It can be used to author content (download - edit - upload), or to use in automated tests to dynamically download content.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.2`
@@ -26,64 +28,83 @@ In your project's Gruntfile, add a section named `cmiscopy` to the data object p
 grunt.initConfig({
   cmiscopy: {
     options: {
-      // Task-specific options go here.
-    },
-    your_target: {
-      // Target-specific file lists and/or options go here.
-    },
+        url: 'http://alfresco-mycompany.com/alfresco/cmisbrowser',
+        cmisRoot: '/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root',
+        localRoot: 'src/webapp',
+        username: 'admin',
+        password: 'admin'
+    }
   },
 });
 ```
 
 ### Options
 
-#### options.separator
+#### options.url
 Type: `String`
-Default value: `',  '`
+Default value: n/a
 
-A string value that is used to do something with whatever.
+A url to connect to your CMS
 
-#### options.punctuation
+#### options.cmisRoot
 Type: `String`
-Default value: `'.'`
+Default value: n/a
 
-A string value that is used to do something else with whatever else.
+The root folder in CMS that will be mapped to the local folder
+
+#### options.localRoot
+Type: `String`
+Default value: n/a
+
+The local folder `cmisRoot` is mapped to
+
+#### options.username
+Type: `String`
+Default value: n/a
+
+username to be used when authenticating with CMS
+
+#### options.password
+Type: `String`
+Default value: n/a
+
+password to be used when authenticating with CMS
 
 ### Usage Examples
+`grunt cmiscopy` takes to optional command line parametes: `path`, `upload`: 
+`grunt cmiscopy:path:upload`
+where 
+- `path` is path to file or folder in CMS relative to `options.cmisRoot`
+- `upload` is an action flag (default is 'download')
 
-#### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
+If no parameters provided it will copy all content of root folder to local project:
+`grunt cmiscopy`  
 
-```js
-grunt.initConfig({
-  cmiscopy: {
-    options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-});
-```
+`grunt cmiscopy:path`           - will download file or entire folder from CMS to local project
+`grunt cmiscopy:path:upload`    - will upload file or entire folder to CMS
 
-#### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
+#### Concrete examples
+`grunt cmiscopy:pages` 
+will download `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages' folder with it's sub-folders to local 
+`src/webapp/pages`
 
-```js
-grunt.initConfig({
-  cmiscopy: {
-    options: {
-      separator: ': ',
-      punctuation: ' !!!',
-    },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-});
-```
+`grunt cmiscopy:pages:upload` 
+will upload local `src/webapp/pages` to CMS `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages'
 
-## Contributing
-In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
+`grunt cmiscopy:pages/faq.html` 
+will download `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages/faq.html' file to local `src/webapp/pages/faq.html`
+
+`grunt cmiscopy:pages/faq.html:upload` 
+will upload local `src/webapp/pages/faq.html` to `/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages/faq.html'
+
+### Limitations:
+- it will not create new content in CMS
+- it will not delete anything
+
+### TODO:
+- support for checkout,  checkin
+- creating new content in CMS
+
 
 ## Release History
 _(Nothing yet)_
