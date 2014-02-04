@@ -1,7 +1,7 @@
 # grunt-cmiscopy
 
-> copy files and folders to and from CMS
-This plugin wraps CmisJS library to provide easy way to access content in Content Management Systems like Alfresco.
+> Copy files and folders to and from CMS.
+This plugin wraps CmisJS library to provide an easy way to access content in Content Management Systems like Alfresco.
 It can be used to author content (download - edit - upload), or to use in automated tests to dynamically download content.
 
 ## Getting Started
@@ -71,13 +71,12 @@ Default value: n/a
 password to be used when authenticating with CMS
 
 ### Usage Examples
-`grunt cmiscopy` takes to optional command line parametes: `path`, `upload`: 
-`grunt cmiscopy:path:upload`
+`grunt cmiscopy` takes two optional command line parametes: `grunt cmiscopy:path:action`
 where 
 - `path` is path to file or folder in CMS relative to `options.cmisRoot`
-- `upload` is an action flag (default is 'download')
+- `action` is an action flag. Currently only 'upload' action flag is supported. (default is 'download'). 
 
-If no parameters provided it will copy all content of root folder to local project:
+If no parameters provided it will download all content of root folder to local project:
 `grunt cmiscopy`  
 
 `grunt cmiscopy:path`           - will download file or entire folder from CMS to local project
