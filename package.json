@@ -39,5 +39,9 @@
   },
   "keywords": [
     "gruntplugin"
-  ]
+  ],
+  "dependencies": {
+    "async": "~0.2.10",
+    "cmis": "~0.1.2"
+  }
 }
