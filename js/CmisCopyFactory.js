@@ -19,7 +19,7 @@ var actions = {
     download: 'download',
     u: 'upload',
     upload: 'upload'
-}
+};
 
 module.exports = function(cmisSession, grunt, options, pathArg, actionArg) {
     var cmisPath = removeTrailingSlash(options.cmisRoot);
@@ -210,5 +210,5 @@ module.exports = function(cmisSession, grunt, options, pathArg, actionArg) {
         
         runTask: runTask
     };
-}
+};
 
