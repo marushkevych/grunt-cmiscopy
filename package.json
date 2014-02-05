@@ -32,13 +32,17 @@
     "grunt-contrib-nodeunit": "~0.2.0",
     "grunt": "~0.4.2",
     "async": "~0.2.10",
-    "cmis": "~0.1.2"
+    "cmis": "~0.1.2",
+    "grunt-jasmine-node": "~0.1.0"
   },
   "peerDependencies": {
     "grunt": "~0.4.2"
   },
   "keywords": [
-    "gruntplugin"
+    "gruntplugin",
+    "alfresco",
+    "cms",
+    "cmis"
   ],
   "dependencies": {
     "async": "~0.2.10",

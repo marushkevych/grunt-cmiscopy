@@ -10,55 +10,60 @@
 
 module.exports = function(grunt) {
 
-  // Project configuration.
-  grunt.initConfig({
-    jshint: {
-      all: [
-        'Gruntfile.js',
-        'tasks/*.js',
-        '<%= nodeunit.tests %>',
-      ],
-      options: {
-        jshintrc: '.jshintrc',
-      },
-    },
-
-    // Before generating any new files, remove any previously-created files.
-    clean: {
-      tests: ['tmp'],
-    },
-
-    // Configuration to be run (and then tested).
-    cmiscopy: {
-        options: {
-                url: 'http://localhost/alfresco/cmisbrowser',
+    // Project configuration.
+    grunt.initConfig({
+        jshint: {
+            all: [
+                'Gruntfile.js',
+                'tasks/*.js',
+                '<%= nodeunit.tests %>',
+            ],
+            options: {
+                jshintrc: '.jshintrc',
+            },
+        },
+        // Before generating any new files, remove any previously-created files.
+        clean: {
+            tests: ['tmp'],
+        },
+        
+        jasmine_node: {
+            projectRoot: ".",
+            requirejs: false,
+            forceExit: true,
+            jUnit: {
+                report: false,
+                savePath: "./tmp/jasmine/",
+                useDotNotation: true,
+                consolidate: true
+            }
+        },
+        
+        cmiscopy: {
+            options: {
+                url: 'http://alfresco-www-dev.webdev.valuex.com/alfresco/cmisbrowser',
                 cmisRoot: '/Sites/speedpass/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root',
-                localRoot: 'src/webapp',
+                localRoot: 'tmp',
                 username: 'admin',
                 password: 'admin'
-        },
-    },
+            }
+        }        
 
-    // Unit tests.
-    nodeunit: {
-      tests: ['test/*_test.js'],
-    },
+    });
 
-  });
+    // Actually load this plugin's task(s).
+    grunt.loadTasks('tasks');
 
-  // Actually load this plugin's task(s).
-  grunt.loadTasks('tasks');
+    // These plugins provide necessary tasks.
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-jasmine-node');
 
-  // These plugins provide necessary tasks.
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-nodeunit');
+    // Whenever the "test" task is run, first clean the "tmp" dir, then run this
+    // plugin's task(s), then test the result.
+    grunt.registerTask('test', ['jasmine_node']);
 
-  // Whenever the "test" task is run, first clean the "tmp" dir, then run this
-  // plugin's task(s), then test the result.
-  grunt.registerTask('test', ['clean', 'nodeunit']);
-
-  // By default, lint and run all tests.
-  grunt.registerTask('default', ['jshint']);
+    // By default, lint and run all tests.
+    grunt.registerTask('default', ['jshint', 'test']);
 
 };
