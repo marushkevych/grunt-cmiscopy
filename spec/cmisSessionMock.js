@@ -1,7 +1,7 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+var CmisRequestMock = require('./CmisRequestMock');
 
+exports.setCredentials = function(username, password){};
 
+exports.loadRepositories = function(){ return new CmisRequestMock(true)};
+
+exports.getObjectByPath = function(){};
