@@ -69,6 +69,8 @@ describe("CmisCopyTask", function(){
             
             setCredentials: jasmine.createSpy('setCredentials'),
             
+            setGlobalHandlers: jasmine.createSpy('setGlobalHandlers'),
+            
             getObjectByPath: jasmine.createSpy('getObjectByPath').andCallFake(function(path) {
                 if(path === '/cmis/root/pages/test.html') 
                 {
