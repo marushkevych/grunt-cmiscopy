@@ -20,8 +20,8 @@ module.exports = function(grunt) {
         var options = this.options();
 
         var cmisSession = cmis.createSession(options.url);
-        var fileUtils = createFileUtils(cmisSession, grunt, options);
-        var cmisCopytask = createTask(cmisSession, fileUtils, grunt, options, specificPath, action);
+        var fileUtils = createFileUtils(cmisSession, options);
+        var cmisCopytask = createTask(cmisSession, fileUtils, options, specificPath, action);
         
         
         cmisCopytask.runTask(done);

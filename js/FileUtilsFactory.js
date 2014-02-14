@@ -8,8 +8,9 @@
 var http = require('http');
 var url = require('url');
 var fs = require('fs');
+var grunt = require('grunt');
 
-module.exports = function(cmisSession, grunt, options) {
+module.exports = function(cmisSession, options) {
     return {
         uploadFile: function(fileDir, fileName, fileProps, callback) {
             var filepath = fileDir + '/' + fileName;

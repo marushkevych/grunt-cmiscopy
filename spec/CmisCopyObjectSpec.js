@@ -16,39 +16,39 @@ describe("CmisCopyTask", function(){
     describe("initialization", function(){
         
         it("should remove trailing slash from configured paths", function(){
-            var cmisCopyTask = cmisCopyFactory(null, null, grunt, options, null, null);
+            var cmisCopyTask = cmisCopyFactory(null, null, options, null, null);
 
             expect(cmisCopyTask.cmisPath).toBe('/cmis/root');
             expect(cmisCopyTask.localPath).toBe('local/root');
         });
 
         it("should append path provided as first cmd line arg", function(){
-            var cmisCopyTask = cmisCopyFactory(null, null, grunt, options, "pages/member/", null);
+            var cmisCopyTask = cmisCopyFactory(null, null, options, "pages/member/", null);
 
             expect(cmisCopyTask.cmisPath).toBe('/cmis/root/pages/member');
             expect(cmisCopyTask.localPath).toBe('local/root/pages/member');
         });
 
         it("with no action shoud use 'download'", function(){
-            var cmisCopyTask = cmisCopyFactory(null, null, grunt, options, null, null);
+            var cmisCopyTask = cmisCopyFactory(null, null, options, null, null);
 
             expect(cmisCopyTask.action).toBe('download');
         });
 
         it("with 'upload' action should use 'upload'", function(){
-            var cmisCopyTask = cmisCopyFactory(null, null, grunt, options, null, 'upload');
+            var cmisCopyTask = cmisCopyFactory(null, null, options, null, 'upload');
 
             expect(cmisCopyTask.action).toBe('upload');
         });
 
         it("with 'download' action should use 'download'", function(){
-            var cmisCopyTask = cmisCopyFactory(null, null, grunt, options, null, 'download');
+            var cmisCopyTask = cmisCopyFactory(null, null, options, null, 'download');
 
             expect(cmisCopyTask.action).toBe('download');
         });
         
         it("with invalid action should result in error", function(){
-            expect(function(){cmisCopyFactory(null, null, grunt, options, null, 'foo');}).toThrow(new Error("Invalid action: foo"));
+            expect(function(){cmisCopyFactory(null, null, options, null, 'foo');}).toThrow(new Error("Invalid action: foo"));
         });
     });
     
@@ -74,7 +74,7 @@ describe("CmisCopyTask", function(){
             getObjectByPath: jasmine.createSpy('getObjectByPath').andCallFake(function(path) {
                 if(path === '/cmis/root/pages/test.html') 
                 {
-                    // if file - retirn empty object
+                    // if file - return empty object
                     return new CmisRequestMock(true, {});
                 }
                 
@@ -104,7 +104,7 @@ describe("CmisCopyTask", function(){
         };
         
         it('should authenticate session', function(){
-            var cmisCopyTask = cmisCopyFactory(cmisSession, null, grunt, options, 'pages/foo.html', null);
+            var cmisCopyTask = cmisCopyFactory(cmisSession, null, options, 'pages/foo.html', null);
 
             cmisCopyTask.runTask(done);
             
@@ -118,7 +118,7 @@ describe("CmisCopyTask", function(){
                 })
             };
             
-            var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtils, grunt, options, 'pages/test.html', null);
+            var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtils, options, 'pages/test.html', null);
 
             cmisCopyTask.runTask(done);
             

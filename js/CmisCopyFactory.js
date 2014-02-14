@@ -6,6 +6,7 @@
  * Licensed under the MIT license.
  */
 var async = require('async');
+var grunt = require('grunt');
 
 
 function removeTrailingSlash(path) {
@@ -19,7 +20,7 @@ var actions = {
     upload: 'upload'
 };
 
-module.exports = function(cmisSession, fileUtils, grunt, options, pathArg, actionArg) {
+module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
     var cmisPath = removeTrailingSlash(options.cmisRoot);
     var localPath = removeTrailingSlash(options.localRoot);
     var action = actions.download; // default action
