@@ -19,7 +19,7 @@ module.exports = function(cmisSession, grunt, options) {
             var overwriteFlag = true;
             var mimeType = fileProps['cmis:contentStreamMimeType'].value;
             cmisSession.setContentStream(objectId, contentBuffer, overwriteFlag, mimeType).ok(function() {
-                console.log("uploaded", mimeType, filepath);
+                grunt.log.ok("uploaded", mimeType, filepath);
                 callback(null);
             }).notOk(function(err) {
                 grunt.log.error();
@@ -49,7 +49,7 @@ module.exports = function(cmisSession, grunt, options) {
                 } else {
                     response.pipe(file);
                     response.on('end', function() {
-                        grunt.log.writeln('downloaded', fileProps['cmis:contentStreamMimeType'].value, filePath);
+                        grunt.log.ok('downloaded', fileProps['cmis:contentStreamMimeType'].value, filePath);
                         callback(null);
                     });
                     response.on('error', function() {

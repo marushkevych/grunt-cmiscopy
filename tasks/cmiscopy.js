@@ -15,7 +15,7 @@ module.exports = function(grunt) {
     var createFileUtils = require('../js/FileUtilsFactory');
 
     grunt.registerTask('cmiscopy', 'copy files and folders to and from CMS', function(specificPath, action) {
-
+        
         var done = this.async();
         var options = this.options();
 

@@ -40,9 +40,18 @@ module.exports = function(cmisSession, fileUtils, grunt, options, pathArg, actio
     }
     
     function runTask(done){
-        cmisSession.setCredentials(options.username, options.password);
-        cmisSession.loadRepositories().ok(function() {
+        // set global (default) error handlers
+        function defaultErrorHandler(err){
+            grunt.log.error();
+            grunt.log.error(err);
+            done(false);               
+        }
+        cmisSession.setGlobalHandlers(defaultErrorHandler, defaultErrorHandler);
 
+        cmisSession.setCredentials(options.username, options.password);
+        
+        grunt.log.ok('Connecting to', options.url)
+        cmisSession.loadRepositories().ok(function() {
             cmisSession.getObjectByPath(cmisPath).ok(function(collection) {
                 if (collection.objects == null) {
                     // if collection is empty - it must be a file
@@ -63,15 +72,7 @@ module.exports = function(cmisSession, fileUtils, grunt, options, pathArg, actio
                 grunt.log.error('failed to retrieve object:', cmisPath);
                 done(false);
             });
-        }).notOk(function(err) {
-            grunt.log.error();
-            grunt.log.error(err.error);
-            done(false);
-        }).error(function(err) {
-            grunt.log.error();
-            grunt.log.error('failed to load repositories');
-            done(false);
-        });        
+        });
     }
 
 
