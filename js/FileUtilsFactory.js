@@ -16,7 +16,14 @@ module.exports = function(cmisSession, options) {
             var filepath = fileDir + '/' + fileName;
 
             var objectId = fileProps['cmis:objectId'].value;
-            var contentBuffer = grunt.file.read(filepath, {encoding: null});
+            var contentBuffer;
+            try{
+                contentBuffer = grunt.file.read(filepath, {encoding: null});
+            }catch(error){
+                grunt.log.error('unable to read file', filepath);
+                return;
+            }
+            
             var overwriteFlag = true;
             var mimeType = fileProps['cmis:contentStreamMimeType'].value;
             cmisSession.setContentStream(objectId, contentBuffer, overwriteFlag, mimeType).ok(function() {
