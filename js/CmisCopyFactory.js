@@ -42,18 +42,18 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
         }
     }
     
-    // init cmisSession
-    // set global (default) error handlers
-    cmisSession.setGlobalHandlers(defaultErrorHandler, defaultErrorHandler);
     cmisSession.setCredentials(options.username, options.password);
     
-    function defaultErrorHandler(err){
-        grunt.log.error();
-        grunt.log.error(err);
-        done(false);               
-    }
     
     function runTask(done){
+        
+        // set global (default) error handlers
+        function defaultErrorHandler(err){
+            grunt.log.error();
+            grunt.log.error(err);
+            done(false);               
+        }
+        cmisSession.setGlobalHandlers(defaultErrorHandler, defaultErrorHandler);
         
         grunt.log.ok('Connecting to', options.url);
         cmisSession.loadRepositories().ok(function() {

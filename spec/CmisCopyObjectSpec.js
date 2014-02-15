@@ -228,6 +228,9 @@ describe("CmisCopyTask", function(){
             fileUtilsMock = {
                 downloadFile: jasmine.createSpy('downloadFile').andCallFake(function(fileDir, fileName, fileProps, callback){
                     callback(null); 
+                }),
+                uploadFile: jasmine.createSpy('uploadFile').andCallFake(function(fileDir, fileName, fileProps, callback){
+                    callback(null); 
                 })
             };
         });
@@ -263,6 +266,19 @@ describe("CmisCopyTask", function(){
             expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', otherFileCmisProps, jasmine.any(Function));
             expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', fileInSubfolderProps, jasmine.any(Function));
             expect(fileUtilsMock.downloadFile.calls.length).toEqual(3);
+            
+            // expect success
+            expect(done).toHaveBeenCalledWith(true);
+        });
+        
+        it('should upload all files in folder and subfolders when path to folder is provided', function(){
+            var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages', 'u');
+            cmisCopyTask.runTask(done);
+            
+            expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', testFileCmisProps, jasmine.any(Function));
+            expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', otherFileCmisProps, jasmine.any(Function));
+            expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', fileInSubfolderProps, jasmine.any(Function));
+            expect(fileUtilsMock.uploadFile.calls.length).toEqual(3);
             
             // expect success
             expect(done).toHaveBeenCalledWith(true);
