@@ -146,7 +146,11 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
             fileDir = localPath;
         }
 
-        fileUtils.streamFile(fileDir, fileName, fileProps, callback, action === actions.upload);
+        if (action === actions.upload) {
+            fileUtils.uploadFile(fileDir, fileName, fileProps, callback);
+        } else {
+            fileUtils.downloadFile(fileDir, fileName, fileProps, callback);
+        }
     }
 
     return {
