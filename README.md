@@ -122,4 +122,4 @@ will upload local `$localRoot/pages/faq.html` to `$cmisRoot/pages/faq.html`
 
 
 ## Release History
-_(Nothing yet)_
+https://github.com/marushkevych/grunt-cmiscopy/releases
