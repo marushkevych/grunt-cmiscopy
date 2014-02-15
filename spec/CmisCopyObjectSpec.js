@@ -202,8 +202,18 @@ describe("CmisCopyTask", function(){
             expect(cmisCopyTask.action).toBe('upload');
         });
 
+        it("with 'u' action should use 'upload'", function(){
+            var cmisCopyTask = cmisCopyFactory(cmisSession, null, options, null, 'u');
+            expect(cmisCopyTask.action).toBe('upload');
+        });
+
         it("with 'download' action should use 'download'", function(){
             var cmisCopyTask = cmisCopyFactory(cmisSession, null, options, null, 'download');
+            expect(cmisCopyTask.action).toBe('download');
+        });
+
+        it("with 'd' action should use 'download'", function(){
+            var cmisCopyTask = cmisCopyFactory(cmisSession, null, options, null, 'd');
             expect(cmisCopyTask.action).toBe('download');
         });
         
