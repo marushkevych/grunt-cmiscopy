@@ -12,6 +12,14 @@ var grunt = require('grunt');
 
 module.exports = function(cmisSession, options) {
     return {
+        streamFile: function(fileDir, fileName, fileProps, callback, isUpload){
+            if(isUpload){
+                this.uploadFile(fileDir, fileName, fileProps, callback);
+            }else{
+                this.downloadFile(fileDir, fileName, fileProps, callback);
+            }
+        },
+        
         uploadFile: function(fileDir, fileName, fileProps, callback) {
             var filepath = fileDir + '/' + fileName;
 

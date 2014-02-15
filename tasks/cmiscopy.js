@@ -23,7 +23,6 @@ module.exports = function(grunt) {
         var fileUtils = createFileUtils(cmisSession, options);
         var cmisCopytask = createTask(cmisSession, fileUtils, options, specificPath, action);
         
-        
         cmisCopytask.runTask(done);
     });
 };
