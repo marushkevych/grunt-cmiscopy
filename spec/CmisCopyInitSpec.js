@@ -23,7 +23,21 @@ describe("CmisCopyTask initialization", function() {
     });
 
     it("should append path provided as first cmd line arg", function() {
+        var cmisCopyTask = cmisCopyFactory(cmisSession, null, options, "pages/member", null);
+
+        expect(cmisCopyTask.cmisPath).toBe('/cmis/root/pages/member');
+        expect(cmisCopyTask.localPath).toBe('local/root/pages/member');
+    });
+    
+    it("should remove trailing slash from the path provided as first cmd line arg", function() {
         var cmisCopyTask = cmisCopyFactory(cmisSession, null, options, "pages/member/", null);
+
+        expect(cmisCopyTask.cmisPath).toBe('/cmis/root/pages/member');
+        expect(cmisCopyTask.localPath).toBe('local/root/pages/member');
+    });
+    
+    it("should remove leading slash from the path provided as first cmd line arg", function() {
+        var cmisCopyTask = cmisCopyFactory(cmisSession, null, options, "/pages/member/", null);
 
         expect(cmisCopyTask.cmisPath).toBe('/cmis/root/pages/member');
         expect(cmisCopyTask.localPath).toBe('local/root/pages/member');

@@ -15,6 +15,14 @@ function removeTrailingSlash(path) {
     return path.charAt(path.length - 1) === '/' ? path.substring(0, path.length - 1) : path;
 }
 
+function removeLeadingSlash(path) {
+    return path.charAt(0) === '/' ? path.substring(1) : path;
+}
+
+function trimSlashes(path){
+    return removeTrailingSlash(removeLeadingSlash(path));
+}
+
 var actions = {
     d: 'download',
     download: 'download',
@@ -29,7 +37,7 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
 
     // apply pathArg
     if (pathArg) {
-        pathArg = removeTrailingSlash(pathArg);
+        pathArg = trimSlashes(pathArg);
         cmisPath = cmisPath + '/' + pathArg;
         localPath = localPath + '/' + pathArg;
     }
