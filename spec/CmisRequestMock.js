@@ -1,13 +1,21 @@
 // CmisRequestMock constractor 
 module.exports = function(isSuccess, responce){
     this.ok = function(callback){
-        // call callback immidiately
-        if(isSuccess) callback(responce);
+        // call callback asynchronoulsy
+        if(isSuccess) {
+            process.nextTick(function(){
+                callback(responce);
+            });
+        }
         return this;
     };
     
     this.notOk = function(callback){
-        if(!isSuccess) callback(responce);
+        if(!isSuccess) {
+            process.nextTick(function(){
+                callback(responce);
+            });
+        }
         return this;
     };
 

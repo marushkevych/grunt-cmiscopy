@@ -193,78 +193,85 @@ describe("CmisCopyTask", function(){
         });
         
         
-        it('should download single file, when path to file is provided', function(){
+        it('should download single file, when path to file is provided', function(done){
             
             var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages/test.html', null);
 
-            cmisCopyTask.runTask(done);
+            cmisCopyTask.runTask(function(res){
+                // expect success
+                expect(res).toBe(true);
+                expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', testFileCmisProps, jasmine.any(Function));
+                expect(fileUtilsMock.downloadFile.calls.length).toEqual(1);
+                done();
+            });
             
-            expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', testFileCmisProps, jasmine.any(Function));
-            expect(fileUtilsMock.downloadFile.calls.length).toEqual(1);
-            
-            // expect success
-            expect(done).toHaveBeenCalledWith(true);
         });
         
-        it('should fail if file or folder doesnt exist', function(){
+        it('should fail if file or folder doesnt exist', function(done){
             var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages/foo', null);
-            cmisCopyTask.runTask(done);
-            expect(fileUtilsMock.downloadFile).not.toHaveBeenCalled();
+            cmisCopyTask.runTask(function(res){
+                // expect failure
+                expect(res).toBe(false);
+                expect(fileUtilsMock.downloadFile).not.toHaveBeenCalled();
+                done();
+            });
             
-            // expect failure
-            expect(done).toHaveBeenCalledWith(false);
         });
         
-        it('should download all files in folder and subfolders when path to folder is provided', function(){
+        it('should download all files in folder and subfolders when path to folder is provided', function(done){
             var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages');
-            cmisCopyTask.runTask(done);
+            cmisCopyTask.runTask(function(value){
+                // expect success
+                expect(value).toBe(true);
+                
+                expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', testFileCmisProps, jasmine.any(Function));
+                expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', otherFileCmisProps, jasmine.any(Function));
+                expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', fileInSubfolderProps, jasmine.any(Function));
+                expect(fileUtilsMock.downloadFile.calls.length).toEqual(3);
+                done();
+            });
             
-            expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', testFileCmisProps, jasmine.any(Function));
-            expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', otherFileCmisProps, jasmine.any(Function));
-            expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', fileInSubfolderProps, jasmine.any(Function));
-            expect(fileUtilsMock.downloadFile.calls.length).toEqual(3);
-            
-            // expect success
-            expect(done).toHaveBeenCalledWith(true);
         });
         
-        it('should upload all files in folder and subfolders when path to folder is provided', function(){
+        it('should upload all files in folder and subfolders when path to folder is provided', function(done){
             var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages', 'u');
-            cmisCopyTask.runTask(done);
+            cmisCopyTask.runTask(function(value){
+                // expect success
+                expect(value).toBe(true);
+                expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', testFileCmisProps, jasmine.any(Function));
+                expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', otherFileCmisProps, jasmine.any(Function));
+                expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', fileInSubfolderProps, jasmine.any(Function));
+                expect(fileUtilsMock.uploadFile.calls.length).toEqual(3);
+                done();
+            });
             
-            expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', testFileCmisProps, jasmine.any(Function));
-            expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', otherFileCmisProps, jasmine.any(Function));
-            expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', fileInSubfolderProps, jasmine.any(Function));
-            expect(fileUtilsMock.uploadFile.calls.length).toEqual(3);
             
-            // expect success
-            expect(done).toHaveBeenCalledWith(true);
         });
         
-        it('should download all files in all folders and subfolders when no path is provided', function(){
+        it('should download all files in all folders and subfolders when no path is provided', function(done){
             var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options);
-            cmisCopyTask.runTask(done);
-            
-            expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root', 'index.html', indexFileCmisProps, jasmine.any(Function));
-            expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', testFileCmisProps, jasmine.any(Function));
-            expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', otherFileCmisProps, jasmine.any(Function));
-            expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', fileInSubfolderProps, jasmine.any(Function));
-            expect(fileUtilsMock.downloadFile.calls.length).toEqual(4);
-            
-            // expect success
-            expect(done).toHaveBeenCalledWith(true);
+            cmisCopyTask.runTask(function(value){
+                expect(value).toBe(true);
+                expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root', 'index.html', indexFileCmisProps, jasmine.any(Function));
+                expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', testFileCmisProps, jasmine.any(Function));
+                expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', otherFileCmisProps, jasmine.any(Function));
+                expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', fileInSubfolderProps, jasmine.any(Function));
+                expect(fileUtilsMock.downloadFile.calls.length).toEqual(4);
+                done();
+            });
         });
         
-        it('should download all files in subfolder when path to subfolder is provided', function(){
+        it('should download all files in subfolder when path to subfolder is provided', function(done){
             var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages/subFolder');
-            cmisCopyTask.runTask(done);
-            
-            expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', fileInSubfolderProps, jasmine.any(Function));
-            expect(fileUtilsMock.downloadFile.calls.length).toEqual(1);
-            
-            // expect success
-            expect(done).toHaveBeenCalledWith(true);
+            cmisCopyTask.runTask(function(value){
+                // expect success
+                expect(value).toBe(true);
+                expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', fileInSubfolderProps, jasmine.any(Function));
+                expect(fileUtilsMock.downloadFile.calls.length).toEqual(1);
+                done();
+            });
         });
+        
     });
     
 });
