@@ -58,120 +58,123 @@ describe("CmisCopyTask", function(){
         'cmis:baseTypeId': {'value': "cmis:document"}
     };
 
+    var cmisSession;
 
-    var cmisSession = {
-        loadRepositories: jasmine.createSpy('loadRepositories').andReturn(new CmisRequestMock(true)),
+    beforeEach(function(){
+        cmisSession = {
+            loadRepositories: jasmine.createSpy('loadRepositories').andReturn(new CmisRequestMock().resolve()),
 
-        setCredentials: jasmine.createSpy('setCredentials'),
+            setCredentials: jasmine.createSpy('setCredentials'),
 
-        setGlobalHandlers: jasmine.createSpy('setGlobalHandlers'),
+            setGlobalHandlers: jasmine.createSpy('setGlobalHandlers'),
 
-        getObjectByPath: jasmine.createSpy('getObjectByPath').andCallFake(function(path) {
+            getObjectByPath: jasmine.createSpy('getObjectByPath').andCallFake(function(path) {
 
-            if(path === '/cmis/root'){
-                return new CmisRequestMock(true, {
-                    objects: [
-                        {
-                            object: {
-                                properties:pagesFolderCmisProps
+                if(path === '/cmis/root'){
+                    return new CmisRequestMock().resolve({
+                        objects: [
+                            {
+                                object: {
+                                    properties:pagesFolderCmisProps
+                                }
+                            },
+                            {
+                                object: {
+                                    properties:indexFileCmisProps
+                                }
                             }
-                        },
-                        {
-                            object: {
-                                properties:indexFileCmisProps
-                            }
-                        }
-                    ]
-                });
-            }
+                        ]
+                    });
+                }
 
-            if(path === '/cmis/root/pages') 
-            {
-                // if folder return folder object
-                return new CmisRequestMock(true, {
-                    objects: [
-                        {
-                            object: {
-                                properties:testFileCmisProps
+                if(path === '/cmis/root/pages') 
+                {
+                    // if folder return folder object
+                    return new CmisRequestMock().resolve({
+                        objects: [
+                            {
+                                object: {
+                                    properties:testFileCmisProps
+                                }
+                            },
+                            {
+                                object: {
+                                    properties:otherFileCmisProps
+                                }
+                            },
+                            {
+                                object: {
+                                    properties:subFolderCmisProps
+                                }
                             }
-                        },
-                        {
-                            object: {
-                                properties:otherFileCmisProps
-                            }
-                        },
-                        {
-                            object: {
-                                properties:subFolderCmisProps
-                            }
-                        }
-                    ]
-                });
-            }
-            
-            if(path === '/cmis/root/pages/subFolder'){
-                return new CmisRequestMock(true, {
-                    objects: [
-                        {
-                            object: {
-                                properties:fileInSubfolderProps
-                            }
-                        }
-                    ]
-                });
-            }
+                        ]
+                    });
+                }
 
-            if(path === '/cmis/root/pages/test.html') 
-            {
-                // if file - return empty object
-                return new CmisRequestMock(true, {});
-            }
-            
-            // path not found
-            return new CmisRequestMock(false);
-        }),
-        
-        getObject: jasmine.createSpy('getObject').andCallFake(function(objectId) {
-            
-            if(objectId === 'pages12345') 
-            {
-                // if folder return folder object
-                return new CmisRequestMock(true, {
-                    objects: [
-                        {
-                            object: {
-                                properties:testFileCmisProps
+                if(path === '/cmis/root/pages/subFolder'){
+                    return new CmisRequestMock().resolve({
+                        objects: [
+                            {
+                                object: {
+                                    properties:fileInSubfolderProps
+                                }
                             }
-                        },
-                        {
-                            object: {
-                                properties:otherFileCmisProps
-                            }
-                        },
-                        {
-                            object: {
-                                properties:subFolderCmisProps
-                            }
-                        }
-                    ]
-                });
-            }
-            
-            if(objectId === 'subFolder12345'){
-                return new CmisRequestMock(true, {
-                    objects: [
-                        {
-                            object: {
-                                properties:fileInSubfolderProps
-                            }
-                        }
-                    ]
-                });
-            }
-            return new CmisRequestMock(false);
-        })
+                        ]
+                    });
+                }
 
-    };
+                if(path === '/cmis/root/pages/test.html') 
+                {
+                    // if file - return empty object
+                    return new CmisRequestMock().resolve({});
+                }
+
+                // path not found
+                return new CmisRequestMock().reject();
+            }),
+
+            getObject: jasmine.createSpy('getObject').andCallFake(function(objectId) {
+
+                if(objectId === 'pages12345') 
+                {
+                    // if folder return folder object
+                    return new CmisRequestMock().resolve({
+                        objects: [
+                            {
+                                object: {
+                                    properties:testFileCmisProps
+                                }
+                            },
+                            {
+                                object: {
+                                    properties:otherFileCmisProps
+                                }
+                            },
+                            {
+                                object: {
+                                    properties:subFolderCmisProps
+                                }
+                            }
+                        ]
+                    });
+                }
+
+                if(objectId === 'subFolder12345'){
+                    return new CmisRequestMock().resolve({
+                        objects: [
+                            {
+                                object: {
+                                    properties:fileInSubfolderProps
+                                }
+                            }
+                        ]
+                    });
+                }
+                return new CmisRequestMock().reject();
+            })
+
+        };
+    });
     
     
     describe("runTask", function(){

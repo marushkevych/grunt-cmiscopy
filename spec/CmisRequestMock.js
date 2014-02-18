@@ -1,25 +1,34 @@
 // CmisRequestMock constractor 
-module.exports = function(isSuccess, responce){
+module.exports = function(){
+    
     this.ok = function(callback){
-        // call callback asynchronoulsy
-        if(isSuccess) {
-            process.nextTick(function(){
-                callback(responce);
-            });
-        }
+        this.okCallback = callback;
         return this;
     };
     
     this.notOk = function(callback){
-        if(!isSuccess) {
-            process.nextTick(function(){
-                callback(responce);
-            });
-        }
+        this.notOkCallback = callback;
         return this;
     };
 
     this.error = function(callback){
+        this.errorCallback = callback;
+        return this;
+    };
+    
+    this.resolve = function(result){
+        var that = this;
+        process.nextTick(function(){
+            that.okCallback(result);
+        });
+        return this;
+    };
+    
+    this.reject = function(reason){
+        var that = this;
+        process.nextTick(function(){
+            that.notOkCallback(reason);
+        });
         return this;
     };
     
