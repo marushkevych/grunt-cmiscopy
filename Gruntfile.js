@@ -41,8 +41,8 @@ module.exports = function(grunt) {
         
         cmiscopy: {
             options: {
-                url: 'http://host.com/alfresco/cmisbrowser',
-                cmisRoot: '/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root',
+                url: 'http://cmis.alfresco.com/cmisbrowser',
+                cmisRoot: '/Sites',
                 localRoot: 'tmp',
                 username: 'admin',
                 password: 'admin'

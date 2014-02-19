@@ -28,9 +28,9 @@ In your project's Gruntfile, add a section named `cmiscopy` to the data object p
 grunt.initConfig({
   cmiscopy: {
     options: {
-        url: 'http://alfresco-mycompany.com/alfresco/cmisbrowser',
-        cmisRoot: '/Sites/sitename/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root',
-        localRoot: 'src/webapp',
+        url: 'http://cmis.alfresco.com/cmisbrowser',
+        cmisRoot: '/Sites/mysite',
+        localRoot: 'mysite',
         username: 'admin',
         password: 'admin'
     }
