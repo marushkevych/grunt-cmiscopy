@@ -1,6 +1,10 @@
 // CmisRequestMock constractor 
 module.exports = function(){
     
+//    this.notOkCallback = function(reason){
+//        console.log('default error handler', reason);
+//    }
+    
     this.ok = function(callback){
         this.okCallback = callback;
         return this;

@@ -7,11 +7,9 @@ module.exports = function(cmisSession, fileUtils, cmisPath, localPath, action) {
         if (object.succinctProperties['cmis:baseTypeId'] === 'cmis:document') {
             processSingleFile(object, callback);
         } else {
-            processFolder(cmisPath, object, callback);
+            processFolder(object, callback);
         }
     }
-    
-    
 
     function processSingleFile(object, callback) {
         // get parent path and file name
@@ -27,20 +25,19 @@ module.exports = function(cmisSession, fileUtils, cmisPath, localPath, action) {
     function createTask(parentPath, object) {
         return function(callback) {
             if (object.succinctProperties["cmis:baseTypeId"] === 'cmis:folder') {
-                processFolder(object.succinctProperties['cmis:path'], object, callback);
+                processFolder(object, callback);
             } else {
                 processFile(parentPath, object, callback);
             }
         };
     }
 
-
-    function processFolder(path, object, callback) {
+    function processFolder(object, callback) {
         
         cmisSession.getChildren(object.succinctProperties['cmis:objectId']).ok(function(children) {
             var tasks = [];
             children.objects.forEach(function(entry) {
-                tasks.push(createTask(path, entry.object));
+                tasks.push(createTask(object.succinctProperties['cmis:path'], entry.object));
             });
 
             async.parallel(tasks, function(err, results) {
