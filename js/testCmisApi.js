@@ -9,8 +9,8 @@ function defaultErrorHandler(err) {
 cmisSession.setGlobalHandlers(defaultErrorHandler, defaultErrorHandler);
 
 cmisSession.loadRepositories().ok(function() {
-    cmisSession.getObjectByPath('/Sites').ok(function(data) {
-        console.log(data)
+    cmisSession.getObjectByPath('/Sites/f1.txt').ok(function(data) {
+        console.log(require('util').inspect(data,  { depth: null }))
 
     });
 });

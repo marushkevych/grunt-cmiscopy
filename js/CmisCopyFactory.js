@@ -66,6 +66,11 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
         grunt.log.ok('Connecting to', options.url);
         cmisSession.loadRepositories().ok(function() {
             cmisSession.getObjectByPath(cmisPath).ok(function(collection) {
+                
+                require('./FilePorcessorLegacyApi')(cmisSession, fileUtils, options, cmisPath, localPath, action).process(collection, function(err){
+                    done(err == null);
+                });
+                
                 if (collection.objects == null) {
                     // if collection is empty - it must be a file
                     processSingleFile(done);
