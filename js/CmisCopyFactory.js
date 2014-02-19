@@ -7,9 +7,8 @@
  */
 'use strict';
 
-var async = require('async');
 var grunt = require('grunt');
-
+var actions = require('./Actions');
 
 function removeTrailingSlash(path) {
     return path.charAt(path.length - 1) === '/' ? path.substring(0, path.length - 1) : path;
@@ -22,13 +21,6 @@ function removeLeadingSlash(path) {
 function trimSlashes(path){
     return removeTrailingSlash(removeLeadingSlash(path));
 }
-
-var actions = {
-    d: 'download',
-    download: 'download',
-    u: 'upload',
-    upload: 'upload'
-};
 
 module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
     var cmisPath = removeTrailingSlash(options.cmisRoot);
@@ -67,20 +59,10 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
         cmisSession.loadRepositories().ok(function() {
             cmisSession.getObjectByPath(cmisPath).ok(function(collection) {
                 
-                require('./FilePorcessorLegacyApi')(cmisSession, fileUtils, options, cmisPath, localPath, action).process(collection, function(err){
+                require('./FilePorcessorLegacyApi')(cmisSession, fileUtils, cmisPath, localPath, action).process(collection, function(err){
                     done(err == null);
                 });
                 
-                if (collection.objects == null) {
-                    // if collection is empty - it must be a file
-                    processSingleFile(done);
-                } else {
-                    // its a folder
-                    processFolder(cmisPath, collection, function(err) {
-                        done(err == null);
-                    });
-                }
-
             }).notOk(function(err) {
                 grunt.log.error();
                 grunt.log.error('content not found:', cmisPath);
@@ -93,78 +75,6 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
         });
     }
 
-
-    function processSingleFile(done) {
-        // get parent path and file name
-        var lastSlashIndex = cmisPath.lastIndexOf('/');
-        var fileName = cmisPath.slice(lastSlashIndex + 1);
-        cmisPath = cmisPath.slice(0, lastSlashIndex);
-        localPath = localPath.slice(0, localPath.lastIndexOf('/'));
-
-        cmisSession.getObjectByPath(cmisPath).ok(function(collection) {
-            // find file object in collection
-            var fileProps;
-            collection.objects.forEach(function(entry) {
-                //console.log('comparing ', entry.object.properties["cmis:name"].value, 'with', fileName)
-                if (entry.object.properties["cmis:name"].value === fileName) {
-                    fileProps = entry.object.properties;
-                }
-            });
-            if (fileProps) {
-                processFile(cmisPath, fileProps, function(err) {
-                    done(err == null);
-                });
-            } else {
-                // file not found
-                grunt.log.error();
-                grunt.log.error('File not found:', cmisPath + '/' + fileName);
-                done(false);
-            }
-        });
-    }
-
-    // create function to run with async.parallel()
-    function createTask(parentPath, nodeProps) {
-        return function(callback) {
-            if (nodeProps["cmis:baseTypeId"].value === 'cmis:folder') {
-                // get collection
-                cmisSession.getObject(nodeProps['cmis:objectId'].value).ok(function(collection) {
-                    processFolder(nodeProps['cmis:path'].value, collection, callback);
-                });
-            } else {
-                processFile(parentPath, nodeProps, callback);
-            }
-        };
-    }
-
-
-    function processFolder(path, collection, callback) {
-        var tasks = [];
-        collection.objects.forEach(function(entry) {
-            tasks.push(createTask(path, entry.object.properties));
-        });
-
-        async.parallel(tasks, function(err, results) {
-            callback(err);
-        });
-    }
-
-    function processFile(path, fileProps, callback) {
-        var fileName = fileProps["cmis:name"].value;
-
-        var fileDir = path.slice(cmisPath.length + 1);
-        if (fileDir) {
-            fileDir = localPath + '/' + fileDir;
-        } else {
-            fileDir = localPath;
-        }
-
-        if (action === actions.upload) {
-            fileUtils.uploadFile(fileDir, fileName, fileProps, callback);
-        } else {
-            fileUtils.downloadFile(fileDir, fileName, fileProps, callback);
-        }
-    }
 
     return {
         // expose for testing
