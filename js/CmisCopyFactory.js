@@ -46,6 +46,7 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
     
     
     function runTask(done){
+        var fileProcessor;
         
         // set global (default) error handlers
         function defaultErrorHandler(err){
@@ -57,9 +58,21 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
         
         grunt.log.ok('Connecting to', options.url);
         cmisSession.loadRepositories().ok(function() {
-            cmisSession.getObjectByPath(cmisPath).ok(function(collection) {
+            cmisSession.getObjectByPath(cmisPath).ok(function(object) {
+                if(object.succinctProperties){
+                    // current CMIS
+                    fileProcessor = require('./FilePorcessor')(cmisSession, fileUtils, cmisPath, localPath, action);
+                } else {
+                    // legacy CMIS
+                    console.log('using legacy API')
+                    fileProcessor = require('./FilePorcessorLegacyApi')(cmisSession, fileUtils, cmisPath, localPath, action);
+                }
                 
-                require('./FilePorcessorLegacyApi')(cmisSession, fileUtils, cmisPath, localPath, action).process(collection, function(err){
+                fileProcessor.process(object, function(err){
+                    if(err){
+                        grunt.log.error();
+                        grunt.log.error(err);                        
+                    }
                     done(err == null);
                 });
                 

@@ -12,63 +12,54 @@ var grunt = require('grunt');
 
 module.exports = function(cmisSession, options) {
     return {
-        uploadFile: function(fileDir, fileName, fileProps, callback) {
+        uploadFile: function(fileDir, fileName, objectId, mimeType, callback) {
             var filepath = fileDir + '/' + fileName;
 
-            var objectId = fileProps['cmis:objectId'].value;
             var contentBuffer;
             try{
                 contentBuffer = grunt.file.read(filepath, {encoding: null});
             }catch(error){
                 grunt.log.error('unable to read file', filepath);
+                // ignore this error and continue wiht next file
+                callback();
                 return;
             }
             
             var overwriteFlag = true;
-            var mimeType = fileProps['cmis:contentStreamMimeType'].value;
             cmisSession.setContentStream(objectId, contentBuffer, overwriteFlag, mimeType).ok(function() {
                 grunt.log.ok("uploaded", mimeType, filepath);
-                callback(null);
+                callback();
             }).notOk(function(err) {
-                grunt.log.error();
-                grunt.log.error(err);
                 callback(err);
             }).error(function(err) {
-                grunt.log.error();
-                grunt.log.error(err);
                 callback(err);
             });
         },
 
-        downloadFile: function(fileDir, fileName, fileProps, callback) {
+        downloadFile: function(fileDir, fileName, objectId, mimeType, callback) {
             var filePath = fileDir + '/' + fileName;
 
             grunt.file.mkdir(fileDir);
             var file = fs.createWriteStream(filePath);
 
-            var URL = cmisSession.getContentStreamURL(fileProps['cmis:objectId'].value);
+            var URL = cmisSession.getContentStreamURL(objectId);
 
             var requestOptions = url.parse(URL);
             requestOptions.auth = options.username + ':' + options.password;
             http.get(requestOptions, function(response) {
                 if (response.statusCode !== 200) {
-                    grunt.log.error(response.statusCode, filePath);
-                    callback(response);
+                    callback(response.statusCode + " " + filePath);
                 } else {
                     response.pipe(file);
                     response.on('end', function() {
-                        grunt.log.ok('downloaded', fileProps['cmis:contentStreamMimeType'].value, filePath);
+                        grunt.log.ok('downloaded', mimeType, filePath);
                         callback(null);
                     });
                     response.on('error', function() {
-                        grunt.log.error();
-                        grunt.log.error('error streaming file', filePath);
-                        callback('error streaming file');
+                        callback('error streaming file ' + filePath);
                     });
                 }
             }).on('error', function(e) {
-                grunt.log.error();
-                grunt.log.error("Got error: " + e.message);
                 callback(e.message);
             });
         }

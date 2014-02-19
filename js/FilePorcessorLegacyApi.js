@@ -1,6 +1,5 @@
 var actions = require('./Actions');
 var async = require('async');
-var grunt = require('grunt');
 
 module.exports = function(cmisSession, fileUtils, cmisPath, localPath, action) {
 
@@ -36,9 +35,7 @@ module.exports = function(cmisSession, fileUtils, cmisPath, localPath, action) {
                 processFile(cmisPath, fileProps, callback);
             } else {
                 // file not found
-                grunt.log.error();
-                grunt.log.error('File not found:', cmisPath + '/' + fileName);
-                callback('File not found');
+                callback('File not found:', cmisPath + '/' + fileName);
             }
         });
     }
@@ -71,6 +68,8 @@ module.exports = function(cmisSession, fileUtils, cmisPath, localPath, action) {
 
     function processFile(path, fileProps, callback) {
         var fileName = fileProps["cmis:name"].value;
+        var objectId = fileProps["cmis:objectId"].value;
+        var mimeType = fileProps["cmis:contentStreamMimeType"].value;
 
         var fileDir = path.slice(cmisPath.length + 1);
         if (fileDir) {
@@ -80,9 +79,9 @@ module.exports = function(cmisSession, fileUtils, cmisPath, localPath, action) {
         }
 
         if (action === actions.upload) {
-            fileUtils.uploadFile(fileDir, fileName, fileProps, callback);
+            fileUtils.uploadFile(fileDir, fileName, objectId, mimeType, callback);
         } else {
-            fileUtils.downloadFile(fileDir, fileName, fileProps, callback);
+            fileUtils.downloadFile(fileDir, fileName, objectId, mimeType, callback);
         }
     }    
     
