@@ -70,8 +70,8 @@ Default value: n/a
 
 password to be used when authenticating with CMS
 
-### Usage Examples
-`grunt cmiscopy` takes two optional command line parametes: `grunt cmiscopy:path:action`
+### Command Line Arguments
+`grunt cmiscopy` takes two optional command line parametes - path and action: `grunt cmiscopy:path:action`
 where 
 - `path` is path to file or folder in CMS relative to `options.cmisRoot`
 - `action` is an action flag. Supported actions:Currently only 'upload' action flag is supported. (default is 'download'). 
@@ -98,7 +98,7 @@ This will list objects in folder
 grunt cmiscopy:path:list
 ```
 
-#### Concrete examples
+### Usage Examples
 ```
 grunt cmiscopy:pages
 ```
