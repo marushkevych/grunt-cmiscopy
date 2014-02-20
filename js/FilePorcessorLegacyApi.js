@@ -72,16 +72,20 @@ module.exports = function(cmisSession, fileUtils, cmisPath, localPath, action) {
         var mimeType = fileProps["cmis:contentStreamMimeType"].value;
 
         var fileDir = path.slice(cmisPath.length + 1);
+        var localDir;
         if (fileDir) {
-            fileDir = localPath + '/' + fileDir;
+            localDir = localPath + '/' + fileDir;
         } else {
-            fileDir = localPath;
+            localDir = localPath;
         }
 
         if (action === actions.upload) {
-            fileUtils.uploadFile(fileDir, fileName, objectId, mimeType, callback);
+            fileUtils.uploadFile(localDir, fileName, objectId, mimeType, callback);
+        } else if (action === actions.download){
+            fileUtils.downloadFile(localDir, fileName, objectId, mimeType, callback);
         } else {
-            fileUtils.downloadFile(fileDir, fileName, objectId, mimeType, callback);
+            console.log(fileDir + '/' + fileName);
+            callback();
         }
     }    
     

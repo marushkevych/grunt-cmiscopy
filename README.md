@@ -1,8 +1,8 @@
 # grunt-cmiscopy
 
 > Copy files and folders to and from CMS.
-This plugin wraps [CmisJS](https://npmjs.org/package/cmis) library to provide an easy way to access content in Content Management Systems like Alfresco.
-It can be used to author content (download - edit - upload), or to use in automated tests to dynamically download content.
+This plugin wraps [CmisJS](https://npmjs.org/package/cmis) library to provide an easy way to access content in CMIS repositories like Alfresco.
+It can be used to author content (download - edit - upload), to browse or to use in automated tests to dynamically download content.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.2`
@@ -74,7 +74,10 @@ password to be used when authenticating with CMS
 `grunt cmiscopy` takes two optional command line parametes: `grunt cmiscopy:path:action`
 where 
 - `path` is path to file or folder in CMS relative to `options.cmisRoot`
-- `action` is an action flag. Currently only 'upload' action flag is supported. (default is 'download'). 
+- `action` is an action flag. Supported actions:Currently only 'upload' action flag is supported. (default is 'download'). 
+    - download or d (default)
+    - upload or u
+    - list or l - list all aobjects in folder recursively
 
 If no parameters provided it will download all content of root folder to local project:
 ```
@@ -89,6 +92,10 @@ grunt cmiscopy:path
 This will upload file or entire folder to CMS
 ```
 grunt cmiscopy:path:upload
+
+This will list objects in folder 
+```
+grunt cmiscopy:path:list
 ```
 
 #### Concrete examples
@@ -96,6 +103,15 @@ grunt cmiscopy:path:upload
 grunt cmiscopy:pages
 ```
 will download `$cmisRoot/pages` folder with it's sub-folders to `$localRoot/pages`
+
+```
+grunt cmiscopy:pages:l
+```
+will list all objects recurcively in `$cmisRoot/pages` folder
+```
+grunt cmiscopy::l
+```
+will list all objects recurcively in `$cmisRoot` folder
 
 ```
 grunt cmiscopy:pages:upload

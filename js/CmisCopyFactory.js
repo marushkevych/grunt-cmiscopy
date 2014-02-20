@@ -58,6 +58,10 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
         
         grunt.log.ok('Connecting to', options.url);
         cmisSession.loadRepositories().ok(function() {
+            if(action === actions.list){
+                grunt.log.ok('Listing contents of', cmisPath);
+            }
+            
             cmisSession.getObjectByPath(cmisPath).ok(function(object) {
                 if(object.succinctProperties){
                     // current CMIS

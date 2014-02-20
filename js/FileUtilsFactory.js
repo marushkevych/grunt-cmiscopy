@@ -27,7 +27,7 @@ module.exports = function(cmisSession, options) {
             
             var overwriteFlag = true;
             cmisSession.setContentStream(objectId, contentBuffer, overwriteFlag, mimeType).ok(function() {
-                grunt.log.ok("uploaded", mimeType, filepath);
+                grunt.log.ok("uploaded", filepath);
                 callback();
             }).notOk(function(err) {
                 callback(err);
@@ -48,11 +48,12 @@ module.exports = function(cmisSession, options) {
             requestOptions.auth = options.username + ':' + options.password;
             http.get(requestOptions, function(response) {
                 if (response.statusCode !== 200) {
-                    callback(response.statusCode + " " + filePath);
+                    grunt.log.error('Download failed', response.statusCode, filePath)
+                    callback();
                 } else {
                     response.pipe(file);
                     response.on('end', function() {
-                        grunt.log.ok('downloaded', mimeType, filePath);
+                        grunt.log.ok('downloaded', filePath);
                         callback(null);
                     });
                     response.on('error', function() {
