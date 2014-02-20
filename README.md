@@ -2,7 +2,7 @@
 
 > Copy files and folders to and from CMS.
 This plugin wraps [CmisJS](https://npmjs.org/package/cmis) library to provide an easy way to access content in CMIS repositories like Alfresco.
-It can be used to author content (download - edit - upload), to browse or to use in automated tests to dynamically download content.
+It can be used to author content (download - edit - upload), to list files and folders or to use in automated tests to dynamically download content.
 
 ## Getting Started
 This plugin requires Grunt `~0.4.2`
