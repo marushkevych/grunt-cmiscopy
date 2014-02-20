@@ -10,6 +10,33 @@ var url = require('url');
 var fs = require('fs');
 var grunt = require('grunt');
 
+/**
+ * Factory method creates FileUtils object.
+ * 
+ * TODO: Error handling - Translate Return Codes:
+ * invalidArgument              400
+ * objectNotFound               404
+ * permissionDenied             403
+ * notSupported                 405
+ * runtime                      500
+ * constraint                   409
+ * filterNotValid               400
+ * streamNotSupported           403
+ * storage                      500
+ * contentAlreadyExists         409
+ * versioning                   409
+ * updateConflict               409
+ * nameConstraintViolation      409
+ * 
+ * 
+ * @param cmisSession
+ * @param options - options object provided in task config
+ * @returns {
+ *      uploadFile: function(fileDir, fileName, objectId, mimeType, callback),
+ *      downloadFile: function(fileDir, fileName, objectId, mimeType, callback)
+ * }
+ * 
+ */
 module.exports = function(cmisSession, options) {
     return {
         uploadFile: function(fileDir, fileName, objectId, mimeType, callback) {
