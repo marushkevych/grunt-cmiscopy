@@ -77,7 +77,7 @@ where
 - `action` is an action flag. Supported actions:Currently only 'upload' action flag is supported. (default is 'download'). 
     - download or d (default)
     - upload or u
-    - list or l - list all aobjects in folder recursively
+    - list or l - list all objects in folder recursively
 
 If no parameters provided it will download all content of root folder to local project:
 ```
