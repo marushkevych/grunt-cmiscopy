@@ -75,9 +75,9 @@ password to be used when authenticating with CMS
 where 
 - `path` is path to file or folder in CMS relative to `options.cmisRoot`
 - `action` is an action flag. Supported actions:
-    - download or d (default)
-    - upload or u
-    - list or l - list all objects in folder recursively
+    - `download` or `d` (default)
+    - `upload` or `u`
+    - `list` or `l` - list all objects in folder recursively
 
 If no parameters provided it will download all content of root folder to local project:
 ```
