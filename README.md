@@ -9,17 +9,17 @@ It can be used to author content (download - edit - upload), to list documents o
 grunt cmiscopy
 ```  
 
-##### download file or entire folder denoted by 'path' argument:
+##### download file or entire folder denoted by `cmisRoot/path`:
 ```
 grunt cmiscopy:path
 ```
 
-##### upload file or entire folder to CMIS repo:
+##### upload `cmisRoot/path` file or entire folder to CMIS repo:
 ```
 grunt cmiscopy:path:u
 ```
 
-##### list all documents in folder 'path' and subfolders
+##### list all documents in `cmisRoot/path` and subfolders
 ```
 grunt cmiscopy:path:l
 ```
