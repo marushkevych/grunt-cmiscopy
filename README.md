@@ -19,9 +19,14 @@ grunt cmiscopy:path
 grunt cmiscopy:path:u
 ```
 
-##### list all documents in `cmisRoot/path` and subfolders
+##### list all documents in `cmisRoot/path`:
 ```
 grunt cmiscopy:path:l
+```
+
+##### list all documents in `cmisRoot`:
+```
+grunt cmiscopy::l
 ```
 
 ## Getting Started
@@ -39,9 +44,9 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 grunt.loadNpmTasks('grunt-cmiscopy');
 ```
 
-## The "cmiscopy" task
+## Configuration
 
-### Overview
+
 In your project's Gruntfile, add a section named `cmiscopy` to the data object passed into `grunt.initConfig()`.
 
 ```js
@@ -60,37 +65,22 @@ grunt.initConfig({
 
 ### Options
 
-#### options.url
-Type: `String`
-Default value: n/a
-
+##### options.url
 A url to connect to your CMS
 
-#### options.cmisRoot
-Type: `String`
-Default value: n/a
-
+##### options.cmisRoot
 The root folder in CMS that will be mapped to the local folder
 
-#### options.localRoot
-Type: `String`
-Default value: n/a
-
+##### options.localRoot
 The local folder `cmisRoot` is mapped to
 
-#### options.username
-Type: `String`
-Default value: n/a
-
+##### options.username
 username to be used when authenticating with CMS
 
-#### options.password
-Type: `String`
-Default value: n/a
-
+##### options.password
 password to be used when authenticating with CMS
 
-### Command Line Arguments
+## Command Line Arguments
 `grunt cmiscopy` takes two optional command line parametes - path and action: `grunt cmiscopy:path:action`
 where 
 - `path` is path to file or folder in CMS relative to `options.cmisRoot`
@@ -99,27 +89,14 @@ where
     - `upload` or `u`
     - `list` or `l` - list all objects in folder recursively
 
-If no parameters provided it will download all content of root folder to local project:
+
+### Usage Examples
+
 ```
 grunt cmiscopy
 ```  
+will download all content of `$cmisRoot` to `$localRoot`
 
-This will download file or entire folder from CMS to local project:
-```
-grunt cmiscopy:path
-```
-
-This will upload file or entire folder to CMS
-```
-grunt cmiscopy:path:upload
-```
-
-This will list all documents in folder and subfolders
-```
-grunt cmiscopy:path:list
-```
-
-### Usage Examples
 ```
 grunt cmiscopy:pages
 ```
@@ -128,15 +105,15 @@ will download `$cmisRoot/pages` folder with it's sub-folders to `$localRoot/page
 ```
 grunt cmiscopy:pages:l
 ```
-will list all objects recurcively in `$cmisRoot/pages` folder
+will list all documents in `$cmisRoot/pages` folder
 
 ```
 grunt cmiscopy::l
 ```
-will list all objects recurcively in `$cmisRoot` folder
+will list all documents in `$cmisRoot` folder
 
 ```
-grunt cmiscopy:pages:upload
+grunt cmiscopy:pages:u
 ```
 will upload local `$localRoot/pages` to CMS `$cmisRoot/pages`
 
@@ -146,15 +123,15 @@ grunt cmiscopy:pages/faq.html
 will download `$cmisRoot/pages/faq.html` file to local `$localRoot/pages/faq.html`
 
 ```
-grunt cmiscopy:pages/faq.html:upload
+grunt cmiscopy:pages/faq.html:u
 ```
 will upload local `$localRoot/pages/faq.html` to `$cmisRoot/pages/faq.html`
 
-### Limitations:
+## Limitations:
 - it will not create new content in CMS
 - it will not delete anything
 
-### TODO:
+## TODO:
 - support for 'checkout' and 'checkin' actions
 - creating new content in CMS
 
