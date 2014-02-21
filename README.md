@@ -4,6 +4,26 @@
 This plugin wraps [CmisJS](https://npmjs.org/package/cmis) library to provide an easy way to access content in CMIS repositories like Alfresco.
 It can be used to author content (download - edit - upload), to list documents or to use in automated tests to dynamically download content.
 
+##### download all content (of configured root folder):
+```
+grunt cmiscopy
+```  
+
+##### download file or entire folder denoted by 'path' argument:
+```
+grunt cmiscopy:path
+```
+
+##### upload file or entire folder to CMIS repo:
+```
+grunt cmiscopy:path:u
+```
+
+##### list all documents in folder 'path' and subfolders
+```
+grunt cmiscopy:path:l
+```
+
 ## Getting Started
 This plugin requires Grunt `~0.4.2`
 
