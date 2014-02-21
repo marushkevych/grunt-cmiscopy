@@ -60,6 +60,7 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
         cmisSession.loadRepositories().ok(function() {
             if(action === actions.list){
                 grunt.log.ok('Listing contents of', cmisPath);
+                grunt.log.write('Gatherting info...');
             }
             
             cmisSession.getObjectByPath(cmisPath).ok(function(object) {
@@ -68,7 +69,6 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
                     fileProcessor = require('./FilePorcessor')(cmisSession, fileUtils, cmisPath, localPath, action);
                 } else {
                     // legacy CMIS
-                    console.log('using legacy API')
                     fileProcessor = require('./FilePorcessorLegacyApi')(cmisSession, fileUtils, cmisPath, localPath, action);
                 }
                 
@@ -76,6 +76,13 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
                     if(err){
                         grunt.log.error();
                         grunt.log.error(err);                        
+                    }
+                    
+                    if(action = actions.list){
+                        console.log();
+                        fileProcessor.documents.sort().forEach(function(doc){
+                            console.log(removeLeadingSlash(doc));
+                        });
                     }
                     done(err == null);
                 });
