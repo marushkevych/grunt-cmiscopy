@@ -10,7 +10,7 @@
 
 module.exports = function(grunt) {
 
-    var cmis = require('./cmis');
+    var cmis = require('../js/cmis');
     var createTask = require('../js/CmisCopyFactory');
     var createFileUtils = require('../js/FileUtilsFactory');
 
