@@ -24,6 +24,8 @@ describe("CmisCopyTask with legacy CMIS API", function(){
     //              
     //  /cmis/root/pages/subFolder/
     //                      - fileInSubfolder.html
+    //
+    // /cmis/root/pages/emptyFolder
     
     var pagesFolderCmisProps = {
         'cmis:name': {'value': 'pages'},
@@ -61,6 +63,13 @@ describe("CmisCopyTask with legacy CMIS API", function(){
         'cmis:baseTypeId': {'value': "cmis:document"},
         'cmis:contentStreamMimeType': {'value': "text/html"}
     };
+    
+    var emptyFolderCmisProps = {
+        'cmis:name': {'value': 'emptyFolder'},
+        'cmis:objectId': {'value': 'emptyFolderId'},
+        'cmis:baseTypeId': {'value': "cmis:folder"},
+        'cmis:path':{'value': '/cmis/root/pages/emptyFolder'}
+    };
 
     var cmisSession;
 
@@ -90,6 +99,9 @@ describe("CmisCopyTask with legacy CMIS API", function(){
                         ]
                     });
                 }
+                if(path === '/cmis/root/pages/emptyFolder'){
+                    return new CmisRequestMock().resolve({});
+                }
 
                 if(path === '/cmis/root/pages') 
                 {
@@ -109,6 +121,11 @@ describe("CmisCopyTask with legacy CMIS API", function(){
                             {
                                 object: {
                                     properties:subFolderCmisProps
+                                }
+                            },
+                            {
+                                object: {
+                                    properties:emptyFolderCmisProps
                                 }
                             }
                         ]
@@ -173,6 +190,10 @@ describe("CmisCopyTask with legacy CMIS API", function(){
                             }
                         ]
                     });
+                }
+
+                if(objectId === 'emptyFolderId'){
+                    return new CmisRequestMock().resolve({});
                 }
                 return new CmisRequestMock().reject();
             })
@@ -275,6 +296,15 @@ describe("CmisCopyTask with legacy CMIS API", function(){
                 expect(value).toBe(true);
                 expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', 'fileInSubfolder12345', 'text/html', jasmine.any(Function));
                 expect(fileUtilsMock.downloadFile.calls.length).toEqual(1);
+                done();
+            });
+        });
+        
+        it('should handle empty folder', function(done){
+            var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages/emptyFolder');
+            cmisCopyTask.runTask(function(value){
+                // expect success
+                expect(value).toBe(true);
                 done();
             });
         });

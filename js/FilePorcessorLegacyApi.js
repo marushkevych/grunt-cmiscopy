@@ -35,6 +35,12 @@ module.exports = function(cmisSession, fileUtils, cmisPath, localPath, action) {
                 }
             });
             if (fileProps) {
+                // if type is foler - it must be an empty folder
+                if(fileProps["cmis:baseTypeId"].value === 'cmis:folder'){
+                    callback();
+                    return;
+                }
+                
                 processFile(cmisPath, fileProps, callback);
             } else {
                 // file not found
@@ -49,6 +55,12 @@ module.exports = function(cmisSession, fileUtils, cmisPath, localPath, action) {
             if (nodeProps["cmis:baseTypeId"].value === 'cmis:folder') {
                 // get collection
                 cmisSession.getObject(nodeProps['cmis:objectId'].value).ok(function(collection) {
+                    // check if collection is empty
+                    if(collection.objects == null){
+                        callback();
+                        return;
+                    }
+                    
                     processFolder(nodeProps['cmis:path'].value, collection, callback);
                 });
             } else {
