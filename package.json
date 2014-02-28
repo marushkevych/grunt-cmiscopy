@@ -32,7 +32,6 @@
     "grunt-contrib-nodeunit": "~0.2.0",
     "grunt": "~0.4.2",
     "async": "~0.2.10",
-    "cmis": "~0.1.2",
     "grunt-jasmine-node": "~0.1.0"
   },
   "peerDependencies": {
@@ -46,7 +45,6 @@
   ],
   "dependencies": {
     "async": "~0.2.10",
-    "cmis": "~0.1.2",
-    "superagent": ""
+    "cmis": "~0.1.2"
   }
 }

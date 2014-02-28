@@ -9,7 +9,7 @@ var http = require('http');
 var url = require('url');
 var fs = require('fs');
 var grunt = require('grunt');
-
+var crypto = require('crypto');
 /**
  * Factory method creates FileUtils object.
  * 
@@ -41,8 +41,8 @@ module.exports = function(cmisSession, options) {
     return {
         uploadFile: function(fileDir, fileName, objectId, mimeType, callback) {
             var filepath = fileDir + '/' + fileName;
-
             var contentBuffer;
+            
             try{
                 contentBuffer = grunt.file.read(filepath, {encoding: null});
             }catch(error){
@@ -51,6 +51,18 @@ module.exports = function(cmisSession, options) {
                 callback();
                 return;
             }
+            
+            // get checksum
+            var hash = crypto.createHash('sha1');
+            var fileStream = fs.createReadStream(filepath);
+            hash.setEncoding('hex');
+            fileStream.pipe(hash, {end: false});
+
+            fileStream.on('end', function() {
+                hash.end();
+                console.log(hash.read(), filepath);
+            });
+            
             
             var overwriteFlag = true;
             cmisSession.setContentStream(objectId, contentBuffer, overwriteFlag, mimeType).ok(function() {
@@ -86,6 +98,17 @@ module.exports = function(cmisSession, options) {
                     response.on('error', function() {
                         callback('error streaming file ' + filePath);
                     });
+                    
+                    // get checksum
+                    var hash = crypto.createHash('sha1');
+                    hash.setEncoding('hex');
+                    response.pipe(hash, {end: false});
+
+                    response.on('end', function() {
+                        hash.end();
+                        console.log(hash.read(), filePath);
+                    });
+                    
                 }
             }).on('error', function(e) {
                 callback(e.message);

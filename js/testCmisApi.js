@@ -1,4 +1,4 @@
-var cmis = require('./cmis');
+var cmis = require('cmis');
 var util =  require('util');
 var cmisSession = cmis.createSession('http://cmis.alfresco.com/cmisbrowser');
 cmisSession.setCredentials('admin', 'admin');
