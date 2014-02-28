@@ -928,7 +928,8 @@
         };
 
         /**
-        * checks in a document
+        * checks in a document, if needed mimetype may be specified as 
+        * input['cmis:contentStreamMimeType'] or as option.mimeType
         *
         * @param {String} objectId
         * @param {Boolean} major
@@ -944,7 +945,7 @@
         * @param {Object} options
         * @return {CmisRequest}
         */    
-        session.checkIn = function (objectId, major, input, content, comment, policies, addACEs, removeACEs, options, mimType) {
+        session.checkIn = function (objectId, major, input, content, comment, policies, addACEs, removeACEs, options) {
             var options = _fill(options);
             if ('string' == typeof input){
                 input = {'cmis:name': input};
@@ -969,7 +970,8 @@
             options.cmisaction = 'checkIn';
 
             return _postMultipart(session.defaultRepository.rootFolderUrl,
-                options, content, mimType, properties['cmis:name'])
+                options, content, options.mimeType || properties['cmis:contentStreamMimeType'], 
+                properties['cmis:name'])
 
         };
 
