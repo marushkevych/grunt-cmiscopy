@@ -38,10 +38,57 @@ var crypto = require('crypto');
  * 
  */
 module.exports = function(cmisSession, options) {
+    
+    function compare(stream1, stream2, callback){
+        getCheckSum(stream1, function(err1, checkSum1){
+            if(err1) {
+                callback(err1);
+                return;
+            }
+            getCheckSum(stream2, function(err2, checkSum2){
+                if(err2) {
+                    callback(err2);
+                    return;
+                }
+                
+                callback(null, checkSum1 === checkSum2);
+            });
+            
+        });
+    }
+
+    function getCheckSum(stream, callback) {
+        var hash = crypto.createHash('sha1');
+        hash.setEncoding('hex');
+        stream.pipe(hash, {end: false});
+
+        stream.on('end', function() {
+            hash.end();
+            var checkSum = hash.read();
+            console.log(checkSum);
+            callback(null, checkSum);
+        });
+        stream.on('error', function(error) {
+            callback('error streaming file ' + error);
+        });
+    }
+    
     return {
         uploadFile: function(fileDir, fileName, objectId, mimeType, callback) {
             var filepath = fileDir + '/' + fileName;
-
+//            var contentBuffer;
+//            
+//            try{
+//                contentBuffer = grunt.file.read(filepath, {encoding: null});
+//            }catch(error){
+//                grunt.log.error('unable to read file', filepath);
+//                // ignore this error and continue wiht next file
+//                callback();
+//                return;
+//            }
+            
+            
+            // read file and update
             fs.readFile(filepath, function(err, data){
                 
                 if(err){
@@ -67,7 +114,6 @@ module.exports = function(cmisSession, options) {
             var filePath = fileDir + '/' + fileName;
 
             grunt.file.mkdir(fileDir);
-            var file = fs.createWriteStream(filePath);
 
             var URL = cmisSession.getContentStreamURL(objectId);
 
@@ -78,15 +124,35 @@ module.exports = function(cmisSession, options) {
                     grunt.log.error('Download failed', response.statusCode, filePath)
                     callback();
                 } else {
-                    response.pipe(file);
-                    response.on('end', function() {
-                        response.pipe(process.stdout);
-                        grunt.log.ok('downloaded', filePath);
-                        callback(null);
+                    
+                    // compare file contents and if not the same - download
+                    compare(response, fs.createReadStream(filePath), function(err, isSame){
+                        if(err){
+                            callback(err);
+                            return;
+                        }
+                        if(!isSame){
+                            console.log('not same', filePath);
+                            callback(null);
+                            
+                            response.pipe(fs.createWriteStream(filePath));
+                            
+                            response.on('end', function() {
+                                grunt.log.ok('downloaded', filePath);
+                                callback(null);
+                            });
+                            response.on('error', function() {
+                                callback('error streaming file ' + filePath);
+                            });
+                            
+                        } else {
+                            console.log('no change', filePath)
+                            callback(null);
+                        }
                     });
-                    response.on('error', function() {
-                        callback('error streaming file ' + filePath);
-                    });
+                    
+
+
                     
                 }
             }).on('error', function(e) {
