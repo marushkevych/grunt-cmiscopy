@@ -38,6 +38,58 @@ var crypto = require('crypto');
  * 
  */
 module.exports = function(cmisSession, options) {
+    
+    function getRemoteData(objectId, callback){
+        var URL = cmisSession.getContentStreamURL(objectId);
+        var requestOptions = url.parse(URL);
+        requestOptions.auth = options.username + ':' + options.password;
+        http.get(requestOptions, function(response){
+            callback(null, response);
+        }).on('error', function(e) {
+            callback(e.message);
+        });
+    }
+    
+    function compare(filePath, objectId, callback){
+        getCheckSum(fs.createReadStream(filePath), function(err1, localCheckSum){
+            if(err1) {
+                callback(null, false);
+                return;
+            }
+            
+            //console.log('got local checksum', localCheckSum);
+            
+            getRemoteData(objectId, function(err, data){
+                
+                getCheckSum(data, function(err2, remoteCheckSum){
+                    if(err2) {
+                        callback(null, false);
+                        return;
+                    }
+                    //console.log('got remote checksum', remoteCheckSum);
+                    callback(null, localCheckSum === remoteCheckSum);
+                });
+            })
+            
+            
+        });
+    }
+    
+    function getCheckSum(stream, callback) {
+        var hash = crypto.createHash('sha1');
+        hash.setEncoding('hex');
+        stream.pipe(hash, {end: false});
+        stream.on('end', function() {
+            hash.end();
+            var checkSum = hash.read();
+            
+            callback(null, checkSum);
+        });
+        stream.on('error', function(error) {
+            callback('error streaming file ' + error);
+        });
+    }
+    
     return {
         uploadFile: function(fileDir, fileName, objectId, mimeType, callback) {
             var filepath = fileDir + '/' + fileName;
@@ -67,31 +119,35 @@ module.exports = function(cmisSession, options) {
             var filePath = fileDir + '/' + fileName;
 
             grunt.file.mkdir(fileDir);
-            var file = fs.createWriteStream(filePath);
-
-            var URL = cmisSession.getContentStreamURL(objectId);
-
-            var requestOptions = url.parse(URL);
-            requestOptions.auth = options.username + ':' + options.password;
-            http.get(requestOptions, function(response) {
-                if (response.statusCode !== 200) {
-                    grunt.log.error('Download failed', response.statusCode, filePath)
-                    callback();
-                } else {
-                    response.pipe(file);
-                    response.on('end', function() {
-                        response.pipe(process.stdout);
-                        grunt.log.ok('downloaded', filePath);
-                        callback(null);
-                    });
-                    response.on('error', function() {
-                        callback('error streaming file ' + filePath);
-                    });
-                    
+            compare(filePath, objectId, function(err, isSame){
+                if(err || isSame){
+                    callback(err);
+                    return;
                 }
-            }).on('error', function(e) {
-                callback(e.message);
+                
+                getRemoteData(objectId, function(err, response) {
+                    if(err){
+                        callback(err);
+                        return;
+                    }
+                    if (response.statusCode !== 200) {
+                        grunt.log.error('Download failed', response.statusCode, filePath)
+                        callback();
+                    } else {
+                        response.pipe(fs.createWriteStream(filePath));
+                        response.on('end', function() {
+                            
+                            grunt.log.ok('downloaded', filePath);
+                            callback(null);
+                        });
+                        response.on('error', function() {
+                            callback('error streaming file ' + filePath);
+                        });
+
+                    }
+                });
             });
+
         }
     };
 };
