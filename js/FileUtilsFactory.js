@@ -167,7 +167,9 @@ module.exports = function(cmisSession, options) {
 util.inherits(BufferWriter, Writable);
 
 function BufferWriter(){
-    Writable.call(this, {});
+    // call super constructor
+    Writable.call(this);
+    
     this.buffer = new Buffer(0);
 }
 
@@ -175,6 +177,9 @@ BufferWriter.prototype._write = function(chunk, encoding, callback){
     this.buffer = Buffer.concat([this.buffer, chunk]);
     callback();
 }
+
+console.log(BufferWriter.prototype instanceof Writable);
+console.log(util.inspect(BufferWriter.prototype, { showHidden: true, depth: null }))
 
 
 
