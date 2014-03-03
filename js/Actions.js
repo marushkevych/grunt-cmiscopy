@@ -1,8 +1,7 @@
-exports.d = 'download';
-exports.download = 'download';
-exports.u = 'upload';
-exports.upload = 'upload';
-exports.list = 'list';
-exports.l = 'list';
+exports.download = exports.d = 'download';
+
+exports.upload = exports.u = 'upload';
+
+exports.list = exports.l = 'list';
 
 

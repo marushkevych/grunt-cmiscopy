@@ -34,8 +34,8 @@ var util = require('util');
  * @param cmisSession
  * @param options - options object provided in task config
  * @returns {
- *      uploadFile: function(fileDir, fileName, objectId, mimeType, callback),
- *      downloadFile: function(fileDir, fileName, objectId, mimeType, callback)
+ *      uploadFile: function(localDir, fileName, objectId, mimeType, callback),
+ *      downloadFile: function(localDir, fileName, objectId, mimeType, callback)
  * }
  * 
  */
@@ -91,8 +91,8 @@ module.exports = function(cmisSession, options) {
     }
 
     return {
-        uploadFile: function(fileDir, fileName, objectId, mimeType, callback) {
-            var filepath = fileDir + '/' + fileName;
+        uploadFile: function(localDir, fileName, objectId, mimeType, callback) {
+            var filepath = localDir + '/' + fileName;
 
             fs.readFile(filepath, function(err, data) {
 
@@ -114,13 +114,10 @@ module.exports = function(cmisSession, options) {
                 });
             });
         },
-        downloadFile: function(fileDir, fileName, objectId, mimeType, callback) {
-            var filePath = fileDir + '/' + fileName;
+        downloadFile: function(localDir, fileName, objectId, mimeType, callback) {
+            var filePath = localDir + '/' + fileName;
 
-            grunt.file.mkdir(fileDir);
-
-
-
+            grunt.file.mkdir(localDir);
 
             getRemoteData(objectId, function(err, response) {
                 if (err) {
@@ -133,11 +130,10 @@ module.exports = function(cmisSession, options) {
                 } else {
                     
                     var bufferWriter =  new BufferWriter();
-                    //response.pipe(process.stdout);
                     response.pipe(bufferWriter);
                     
-                    // this will callback when response stream is exhausted
                     compare(response, filePath, function(err, isSame) {
+                        // this will be called when response stream is exhausted
 
                         if (err || isSame) {
                             callback(err);
@@ -177,9 +173,6 @@ BufferWriter.prototype._write = function(chunk, encoding, callback){
     this.buffer = Buffer.concat([this.buffer, chunk]);
     callback();
 }
-
-console.log(BufferWriter.prototype instanceof Writable);
-console.log(util.inspect(BufferWriter.prototype, { showHidden: true, depth: null }))
 
 
 
