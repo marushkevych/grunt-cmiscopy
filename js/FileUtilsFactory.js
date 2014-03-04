@@ -43,7 +43,7 @@ module.exports = function(cmisSession, options) {
 
     function getRemoteData(objectId, callback) {
         var URL = cmisSession.getContentStreamURL(objectId);
-        console.log(URL);
+        
         var requestOptions = url.parse(URL);
         requestOptions.auth = options.username + ':' + options.password;
         http.get(requestOptions, function(response) {
@@ -54,21 +54,18 @@ module.exports = function(cmisSession, options) {
     }
 
     function compare(data, filePath, callback) {
-        getCheckSum(data, function(err2, remoteCheckSum) {
-            if (err2) {
-                callback(null, false);
+        getCheckSum(data, function(err, remoteCheckSum) {
+            if (err) {
+                callback(err);
                 return;
             }
-            //console.log('got remote checksum', remoteCheckSum);
-            
             
             getCheckSum(fs.createReadStream(filePath), function(err1, localCheckSum) {
                 if (err1) {
+                    // ignore if failed to get file CheckSum, just assume they are not the same
                     callback(null, false);
                     return;
                 }
-
-                //console.log('got local checksum', localCheckSum);
                 callback(null, localCheckSum === remoteCheckSum);
             });
             
