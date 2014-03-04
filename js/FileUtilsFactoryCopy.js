@@ -121,7 +121,7 @@ module.exports = function(cmisSession, options) {
             requestOptions.auth = options.username + ':' + options.password;
             http.get(requestOptions, function(response) {
                 if (response.statusCode !== 200) {
-                    grunt.log.error('Download failed', response.statusCode, filePath)
+                    grunt.log.error('Download failed', response.statusCode, filePath);
                     callback();
                 } else {
                     
@@ -146,7 +146,7 @@ module.exports = function(cmisSession, options) {
                             });
                             
                         } else {
-                            console.log('no change', filePath)
+                            console.log('no change', filePath);
                             callback(null);
                         }
                     });

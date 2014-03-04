@@ -79,8 +79,7 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
                         grunt.log.error();
                         grunt.log.error(err);                        
                     }
-                    
-                    if(action = actions.list){
+                    if(action === actions.list){
                         console.log();
                         fileProcessor.documents.sort().forEach(function(doc){
                             console.log(removeLeadingSlash(doc));

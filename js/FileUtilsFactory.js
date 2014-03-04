@@ -10,8 +10,8 @@ var url = require('url');
 var fs = require('fs');
 var grunt = require('grunt');
 var crypto = require('crypto');
-var Writable = require('stream').Writable;
-var util = require('util');
+var BufferWriter = require('./BufferWriter');
+
 /**
  * Factory method creates FileUtils object.
  * 
@@ -123,7 +123,7 @@ module.exports = function(cmisSession, options) {
                     return;
                 }
                 if (response.statusCode !== 200) {
-                    grunt.log.error('Download failed', response.statusCode, filePath)
+                    grunt.log.error('Download failed', response.statusCode, filePath);
                     callback();
                 } else {
                     
@@ -147,7 +147,7 @@ module.exports = function(cmisSession, options) {
                         
                         writer.on('error', function(error){
                             callback('error writing file ' + filePath + ' ' + error);
-                        })
+                        });
                     });
 
 
@@ -158,19 +158,7 @@ module.exports = function(cmisSession, options) {
     };
 };
 
-util.inherits(BufferWriter, Writable);
 
-function BufferWriter(){
-    // call super constructor
-    Writable.call(this);
-    
-    this.buffer = new Buffer(0);
-}
-
-BufferWriter.prototype._write = function(chunk, encoding, callback){
-    this.buffer = Buffer.concat([this.buffer, chunk]);
-    callback();
-}
 
 
 

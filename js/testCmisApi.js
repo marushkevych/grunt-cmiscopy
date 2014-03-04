@@ -8,7 +8,7 @@ cmisSession.setCredentials('admin', 'admin');
 // workspace://SpacesStore/496d618c-82b8-459e-8d07-46053d8b6aa5;1.20
 
 function defaultErrorHandler(err) {
-    console.log(util.inspect(err.body,  { depth: null }))
+    console.log(util.inspect(err.body,  { depth: null }));
 }
 cmisSession.setGlobalHandlers(defaultErrorHandler, defaultErrorHandler);
 
@@ -16,7 +16,7 @@ cmisSession.loadRepositories().ok(function() {
     
     
     cmisSession.checkOut('workspace://SpacesStore/6556375c-5d8f-4eb9-a662-c37fab12f04e').ok(function(object) {
-        console.log(util.inspect(object,  { depth: null }))
+        console.log(util.inspect(object,  { depth: null }));
 
         cmisSession.checkIn(
                 'workspace://SpacesStore/6556375c-5d8f-4eb9-a662-c37fab12f04e;pwc', 
@@ -28,7 +28,7 @@ cmisSession.loadRepositories().ok(function() {
                 null,
                 null,
                 {mimeType: object.succinctProperties['cmis:contentStreamMimeType']}).ok(function(data) {
-            console.log(util.inspect(data,  { depth: null }))
+            console.log(util.inspect(data,  { depth: null }));
 
         });
     });
