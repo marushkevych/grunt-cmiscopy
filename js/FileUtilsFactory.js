@@ -43,6 +43,7 @@ module.exports = function(cmisSession, options) {
 
     function getRemoteData(objectId, callback) {
         var URL = cmisSession.getContentStreamURL(objectId);
+        console.log(URL);
         var requestOptions = url.parse(URL);
         requestOptions.auth = options.username + ':' + options.password;
         http.get(requestOptions, function(response) {
