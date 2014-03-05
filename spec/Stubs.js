@@ -1,5 +1,7 @@
+var resumer = require('resumer');
+
 // CmisRequestMock constractor 
-module.exports = function(){
+exports.CmisRequestMock = function(){
     
 //    this.notOkCallback = function(reason){
 //        console.log('default error handler', reason);
@@ -36,6 +38,35 @@ module.exports = function(){
         return this;
     };
     
+};
+
+
+exports.httpStub = {
+    heventHandlers: {},
+    get: function(options, callback) {
+        this.callback = callback;
+        var that = this;
+        return {
+            on: function(event, handler) {
+                that.heventHandlers[event] = handler;
+            }
+        };
+    },
+    resolve: function(content, statusCode) {
+        // stream content
+        var stream = resumer().queue(content).end();
+        stream.statusCode = statusCode;
+        this.callback(stream);
+    },
+    reject: function(reason) {
+        // call 'error' even handler
+        this.heventHandlers.error({message: reason});
+    },
+    reset: function() {
+        this.heventHandlers = {};
+        this.callback = null;
+    }
+
 };
 
 

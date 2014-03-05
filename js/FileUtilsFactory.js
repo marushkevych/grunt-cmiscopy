@@ -10,7 +10,8 @@ var url = require('url');
 var fs = require('fs');
 var grunt = require('grunt');
 var crypto = require('crypto');
-var BufferWriter = require('./BufferWriter');
+var BufferWriter = require('./BufferStreams').BufferWriter;
+var BufferReader = require('./BufferStreams').BufferReader;
 
 /**
  * Factory method creates FileUtils object.
@@ -43,7 +44,7 @@ module.exports = function(cmisSession, options) {
 
     function getRemoteData(objectId, callback) {
         var URL = cmisSession.getContentStreamURL(objectId);
-        
+
         var requestOptions = url.parse(URL);
         requestOptions.auth = options.username + ':' + options.password;
         http.get(requestOptions, function(response) {
@@ -53,14 +54,14 @@ module.exports = function(cmisSession, options) {
         });
     }
 
-    function compare(data, filePath, callback) {
-        getCheckSum(data, function(err, remoteCheckSum) {
+    function compare(remoteDataStream, localDataStream, callback) {
+        getCheckSum(remoteDataStream, function(err, remoteCheckSum) {
             if (err) {
                 callback(err);
                 return;
             }
-            
-            getCheckSum(fs.createReadStream(filePath), function(err1, localCheckSum) {
+
+            getCheckSum(localDataStream, function(err1, localCheckSum) {
                 if (err1) {
                     // ignore if failed to get file CheckSum, just assume they are not the same
                     callback(null, false);
@@ -68,7 +69,7 @@ module.exports = function(cmisSession, options) {
                 }
                 callback(null, localCheckSum === remoteCheckSum);
             });
-            
+
         });
     }
 
@@ -88,6 +89,18 @@ module.exports = function(cmisSession, options) {
         });
     }
 
+    function doUpload(filepath, objectId, data, mimeType, callback) {
+        var overwriteFlag = true;
+        cmisSession.setContentStream(objectId, data, overwriteFlag, mimeType).ok(function() {
+            grunt.log.ok("uploaded", filepath);
+            callback();
+        }).notOk(function(err) {
+            callback(err);
+        }).error(function(err) {
+            callback(err);
+        });
+    }
+
     return {
         uploadFile: function(localDir, fileName, objectId, mimeType, callback) {
             var filepath = localDir + '/' + fileName;
@@ -100,18 +113,32 @@ module.exports = function(cmisSession, options) {
                     callback();
                     return;
                 }
+                
 
-                var overwriteFlag = true;
-                cmisSession.setContentStream(objectId, data, overwriteFlag, mimeType).ok(function() {
-                    grunt.log.ok("uploaded", filepath);
-                    callback();
-                }).notOk(function(err) {
-                    callback(err);
-                }).error(function(err) {
-                    callback(err);
+                getRemoteData(objectId, function(err, response) {
+                    if (err == null && response.statusCode === 200) {
+                        // check if content is the same
+                        compare(response, new BufferReader(data), function(err, isSame) {
+                            if (err || !isSame) {
+                                doUpload(filepath, objectId, data, mimeType, callback);
+                            }
+                            else
+                            {
+                                // dont upload
+                                callback();
+                            }
+                        });
+
+                    } else {
+                        // if failed to get remote data - just upload
+                        doUpload(filepath, objectId, data, mimeType, callback);
+                    }
+
                 });
+
             });
         },
+        
         downloadFile: function(localDir, fileName, objectId, mimeType, callback) {
             var filePath = localDir + '/' + fileName;
 
@@ -126,26 +153,26 @@ module.exports = function(cmisSession, options) {
                     grunt.log.error('Download failed', response.statusCode, filePath);
                     callback();
                 } else {
-                    
-                    var bufferWriter =  new BufferWriter();
+
+                    var bufferWriter = new BufferWriter();
                     response.pipe(bufferWriter);
-                    
-                    compare(response, filePath, function(err, isSame) {
+
+                    compare(response, fs.createReadStream(filePath), function(err, isSame) {
                         // this will be called when response stream is exhausted
 
                         if (err || isSame) {
                             callback(err);
                             return;
                         }
-                        
+
                         // if not the same - write buffer to a file 
                         var writer = fs.createWriteStream(filePath);
-                        writer.write(bufferWriter.buffer, function(){
+                        writer.write(bufferWriter.buffer, function() {
                             grunt.log.ok('downloaded', filePath);
                             callback(null);
                         });
-                        
-                        writer.on('error', function(error){
+
+                        writer.on('error', function(error) {
                             callback('error writing file ' + filePath + ' ' + error);
                         });
                     });

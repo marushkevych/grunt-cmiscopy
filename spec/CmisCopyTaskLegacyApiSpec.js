@@ -1,5 +1,5 @@
 var cmisCopyFactory = require('../js/CmisCopyFactory');
-var CmisRequestMock = require('./CmisRequestMock');
+var CmisRequestMock = require('./stubs').CmisRequestMock;
 
 
 describe("CmisCopyTask with legacy CMIS API", function(){
