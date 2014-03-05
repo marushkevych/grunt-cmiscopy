@@ -135,65 +135,75 @@ describe("FileUtils", function() {
     });
 
     describe("uploadFile()", function() {
+
+        var fsStub = {
+            readFile: function(path, callback) {
+                this.callback = callback;
+            },
+            resolve: function(content) {
+                this.callback(null, content);
+            },
+            reject: function(reason) {
+                // call 'error' event handler
+                this.callback({message: reason});
+            }
+        };
+
         var fileUtils;
         var cmisSession;
-        var fsStub = {};
         var FileUtilsFactory = proxyquire('../js/FileUtilsFactory', {
             'http': httpStub,
             'fs': fsStub
         });
 
         var cmisRequest;
-        
+
         beforeEach(function() {
             cmisSession = {};
             cmisRequest = new CmisRequestMock();
             cmisSession.setContentStream = jasmine.createSpy('setContentStream').andReturn(cmisRequest);
             fileUtils = FileUtilsFactory(cmisSession, options);
-            
-            fsStub.readFile =function(path, callback) {
-                callback(null, 'foo');
-            };
-            
+
             spyOn(fsStub, 'readFile').andCallThrough();
         });
-        
-        afterEach(function(){
-            
+
+        afterEach(function() {
+
             expect(fsStub.readFile).toHaveBeenCalledWith('tmp/test.txt', jasmine.any(Function));
         });
 
         it("should upload file if content is not the same", function(done) {
             fileUtils.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
                 expect(err).toBeFalsy();
-                expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'foo', true, 'text/plain');
+                expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'new content', true, 'text/plain');
                 expect(cmisSession.setContentStream.calls.length).toEqual(1);
                 done();
             });
+            fsStub.resolve('new content');
             cmisRequest.resolve();
         });
-        
-        it("should not fail if there was failure reading the file", function(done){
-            fsStub.readFile = function(path, callback){
-                callback('error');
-            };
-            spyOn(fsStub, 'readFile').andCallThrough();
-            
+
+        it("should not fail if there was failure reading the file", function(done) {
+
             fileUtils.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
                 expect(err).toBeFalsy();
                 expect(cmisSession.setContentStream).not.toHaveBeenCalled();
                 done();
-            });            
+            });
             
+            fsStub.reject('an error reading file');
+
         });
-        
-        it("should not upload if content is the same", function(done){
-            
+
+        it("should not upload if content is the same", function(done) {
+
             fileUtils.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
                 expect(err).toBeFalsy();
                 expect(cmisSession.setContentStream).not.toHaveBeenCalled();
                 done();
-            });            
+            });
+            
+            fsStub.resolve('old content');
         });
 
     });
