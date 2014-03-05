@@ -2,6 +2,8 @@ var fs = require('fs');
 var grunt = require('grunt');
 var resumer = require('resumer');
 var proxyquire = require('proxyquire');
+var CmisRequestMock = require('./CmisRequestMock');
+
 var httpStub = {
     get: function(options, callback) {
         this.callback = callback;
@@ -17,14 +19,12 @@ var httpStub = {
         stream.statusCode = statusCode;
         this.callback(stream);
     },
-    reject: function(reason){
+    reject: function(reason) {
         // call 'error' even handler
         this.error({message: reason});
     }
 };
-var FileUtilsFactory = proxyquire('../js/FileUtilsFactory', {
-    'http': httpStub
-});
+
 
 var options = {
     url: 'http://alfresco-mycompany.com/alfresco/cmisbrowser',
@@ -35,18 +35,27 @@ var options = {
 };
 
 describe("FileUtils", function() {
-    describe("download action", function() {
 
+
+    describe("downloadFile()", function() {
         var fileUtils;
+        var cmisSession;
+        var FileUtilsFactory = proxyquire('../js/FileUtilsFactory', {
+            'http': httpStub
+        });
+
         beforeEach(function() {
-            var cmisSession = {
-                getContentStreamURL: jasmine.createSpy('getContentStreamURL').andReturn("http://cmis.alfresco.com/cmisbrowser/documentid")
-            };
+            cmisSession = {};
+
+            cmisSession.getContentStreamURL = jasmine.createSpy('getContentStreamURL').andReturn("http://cmis.alfresco.com/cmisbrowser/documentid");
             fileUtils = FileUtilsFactory(cmisSession, options);
             spyOn(httpStub, 'get').andCallThrough();
         });
 
         afterEach(function() {
+            expect(cmisSession.getContentStreamURL).toHaveBeenCalledWith('testId');
+            expect(cmisSession.getContentStreamURL.calls.length).toEqual(1);
+
             // should download file only once
             expect(httpStub.get).toHaveBeenCalled();
             expect(httpStub.get.calls.length).toEqual(1);
@@ -98,7 +107,7 @@ describe("FileUtils", function() {
             // trigger server response
             setTimeout(function() {
                 httpStub.resolve("same content", 200);
-            }, 1000)
+            }, 1000);
         });
 
         it("should ignore if http status is not 200", function(done) {
@@ -113,16 +122,80 @@ describe("FileUtils", function() {
 
             httpStub.resolve("some problem", 409);
         });
-        
-        it("should fail if http request fails with error", function(done){
+
+        it("should fail if http request fails with error", function(done) {
             fileUtils.downloadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
                 expect(err).toBe("some error");
                 done();
             });
 
-            httpStub.reject("some error");            
+            httpStub.reject("some error");
+        });
+
+    });
+
+    describe("uploadFile()", function() {
+        var fileUtils;
+        var cmisSession;
+        var fsStub = {};
+        var FileUtilsFactory = proxyquire('../js/FileUtilsFactory', {
+            'http': httpStub,
+            'fs': fsStub
+        });
+
+        var cmisRequest;
+        
+        beforeEach(function() {
+            cmisSession = {};
+            cmisRequest = new CmisRequestMock();
+            cmisSession.setContentStream = jasmine.createSpy('setContentStream').andReturn(cmisRequest);
+            fileUtils = FileUtilsFactory(cmisSession, options);
+            
+            fsStub.readFile =function(path, callback) {
+                callback(null, 'foo');
+            };
+            
+            spyOn(fsStub, 'readFile').andCallThrough();
         });
         
+        afterEach(function(){
+            
+            expect(fsStub.readFile).toHaveBeenCalledWith('tmp/test.txt', jasmine.any(Function));
+        });
+
+        it("should upload file if content is not the same", function(done) {
+            fileUtils.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+                expect(err).toBeFalsy();
+                expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'foo', true, 'text/plain');
+                expect(cmisSession.setContentStream.calls.length).toEqual(1);
+                done();
+            });
+            cmisRequest.resolve();
+        });
+        
+        it("should not fail if there was failure reading the file", function(done){
+            fsStub.readFile = function(path, callback){
+                callback('error');
+            };
+            spyOn(fsStub, 'readFile').andCallThrough();
+            
+            fileUtils.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+                expect(err).toBeFalsy();
+                expect(cmisSession.setContentStream).not.toHaveBeenCalled();
+                done();
+            });            
+            
+        });
+        
+        it("should not upload if content is the same", function(done){
+            
+            fileUtils.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+                expect(err).toBeFalsy();
+                expect(cmisSession.setContentStream).not.toHaveBeenCalled();
+                done();
+            });            
+        });
+
     });
 });
 
