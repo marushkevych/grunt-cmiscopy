@@ -108,6 +108,32 @@ describe("FileUtils.uploadFile()", function() {
             fsStub.resolve('old content');
             httpStub.resolve("old content", 200);
         });
+        
+        it("should upload file when failed to get remote content with an error", function(done){
+            fileUtils.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+                expect(err).toBeFalsy();
+                expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'old content', true, 'text/plain');
+                expect(cmisSession.setContentStream.calls.length).toEqual(1);
+                done();
+            });
+            fsStub.resolve('old content');
+            httpStub.reject("some error");
+            
+            cmisRequest.resolve();
+        });
+        
+        it("should upload file when failed to get remote content with non 200 status code", function(done){
+            fileUtils.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+                expect(err).toBeFalsy();
+                expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'old content', true, 'text/plain');
+                expect(cmisSession.setContentStream.calls.length).toEqual(1);
+                done();
+            });
+            fsStub.resolve('old content');
+            httpStub.resolve('some problem', 409);
+            
+            cmisRequest.resolve();
+        });
     });
     
 

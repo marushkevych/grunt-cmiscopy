@@ -1,4 +1,4 @@
-var resumer = require('resumer');
+var BufferReader = require('../js/BufferStreams').BufferReader;
 
 // CmisRequestMock constractor 
 exports.CmisRequestMock = function(){
@@ -54,7 +54,7 @@ exports.httpStub = {
     },
     resolve: function(content, statusCode) {
         // stream content
-        var stream = resumer().queue(content).end();
+        var stream = new BufferReader(new Buffer(content));
         stream.statusCode = statusCode;
         this.callback(stream);
     },

@@ -159,10 +159,13 @@ module.exports = function(cmisSession, options) {
 
                         if (err) {
                             // file doesnt exist - just download remote
-                            response.pipe(fs.createWriteStream(filePath));
+                            var writer = fs.createWriteStream(filePath);
+                            response.pipe(writer, {end: false});
                             response.on('end', function() {
-                                grunt.log.ok('downloaded', filePath);
-                                callback(null);
+                                writer.end(function(){
+                                    grunt.log.ok('downloaded', filePath);
+                                    callback(null);
+                                });
                             });
                             response.on('error', function(error) {
                                 callback('error downloading file ' + error);
