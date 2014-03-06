@@ -72,7 +72,7 @@ module.exports = function(cmisSession, options) {
 
         });
     }
-    
+
 
     function getCheckSum(stream, callback) {
         var hash = crypto.createHash('sha1');
@@ -114,7 +114,7 @@ module.exports = function(cmisSession, options) {
                     callback();
                     return;
                 }
-                
+
 
                 getRemoteData(objectId, function(err, response) {
                     if (err == null && response.statusCode === 200) {
@@ -139,7 +139,6 @@ module.exports = function(cmisSession, options) {
 
             });
         },
-        
         downloadFile: function(localDir, fileName, objectId, mimeType, callback) {
             var filePath = localDir + '/' + fileName;
 
@@ -155,35 +154,84 @@ module.exports = function(cmisSession, options) {
                     callback();
                 } else {
 
-                    var bufferWriter = new BufferWriter();
-                    response.pipe(bufferWriter);
 
-                        
-                    getCheckSum(response, function(err, remoteCheckSum) {
+                    // check if local file is the same as remote
+                    fs.readFile(filePath, function(err, data) {
+
                         if (err) {
-                            callback(err);
+                            // file doent exist - just download remote
+                            response.pipe(fs.createWriteStream(filePath));
+                            response.on('end', function() {
+                                grunt.log.ok('downloaded', filePath);
+                                callback(null);
+                            });
+                            response.on('error', function(error) {
+                                callback('error downloading file ' + error);
+                            });
+                            
                             return;
                         }
-
-                        getCheckSum(fs.createReadStream(filePath), function(err1, localCheckSum) {
-                            if (err1 || localCheckSum !== remoteCheckSum) {
-                                // ignore if failed to get file CheckSum, just assume they are not the same
-                                fs.writeFile(filePath, bufferWriter.buffer, function(err) {
-                                    if(err){
-                                        callback('error writing file ' + filePath + ' ' + err);
-                                        return;
-                                    }
-                                    grunt.log.ok('downloaded', filePath);
-                                    callback(null);
-                                });
-                            }else{
-                                // dont download - contents are the same
-                                callback(null);
-                            }
-                        });
-
-                    });
                         
+                        // file exists - check if its different
+                        var bufferWriter = new BufferWriter();
+                        response.pipe(bufferWriter);
+                        
+                        
+                        
+                        
+//                    //compare(response, fs.createReadStream(filePath), function(err, isSame) {
+//
+//                    compareOld(response, filePath, function(err, isSame) {
+//                        // this will be called when response stream is exhausted
+//
+//                        if (err || isSame) {
+//                            callback(err);
+//                            return;
+//                        }
+//
+//                        // if not the same - write buffer to a file 
+//                        fs.writeFile(filePath, bufferWriter.buffer, function(err) {
+//                            if(err){
+//                                callback('error writing file ' + filePath + ' ' + err);
+//                                return;
+//                            }
+//                            grunt.log.ok('downloaded', filePath);
+//                            callback(null);
+//                        });
+//
+//                    });
+
+
+                        getCheckSum(response, function(err, remoteCheckSum) {
+                            if (err) {
+                                callback(err);
+                                return;
+                            }
+
+                            getCheckSum(new BufferReader(data), function(err1, localCheckSum) {
+                                if (err1 || localCheckSum !== remoteCheckSum) {
+                                    // ignore if failed to get file CheckSum, just assume they are not the same
+                                    fs.writeFile(filePath, bufferWriter.buffer, function(err) {
+                                        if (err) {
+                                            callback('error writing file ' + filePath + ' ' + err);
+                                            return;
+                                        }
+                                        grunt.log.ok('downloaded', filePath);
+                                        callback(null);
+                                    });
+                                } else {
+                                    // dont download - contents are the same
+                                    callback(null);
+                                }
+                            });
+
+                        });
+                    });
+
+
+
+
+
 
                 }
             });
