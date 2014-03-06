@@ -44,7 +44,6 @@ describe("FileUtils.downloadFile()", function() {
     it("should download file if doesnt exist locally", function(done) {
         fileUtils.downloadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
             expect(err).toBeFalsy();
-            console.log('checking downloaded content')
             expect(fs.readFileSync('tmp/test.txt').toString()).toBe("new file");
             done();
         });
