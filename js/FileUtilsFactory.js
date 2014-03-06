@@ -63,8 +63,7 @@ module.exports = function(cmisSession, options) {
 
             getCheckSum(localDataStream, function(err1, localCheckSum) {
                 if (err1) {
-                    // ignore if failed to get file CheckSum, just assume they are not the same
-                    callback(null, false);
+                    callback(err1);
                     return;
                 }
                 callback(null, localCheckSum === remoteCheckSum);
@@ -159,7 +158,7 @@ module.exports = function(cmisSession, options) {
                     fs.readFile(filePath, function(err, data) {
 
                         if (err) {
-                            // file doent exist - just download remote
+                            // file doesnt exist - just download remote
                             response.pipe(fs.createWriteStream(filePath));
                             response.on('end', function() {
                                 grunt.log.ok('downloaded', filePath);
@@ -176,62 +175,28 @@ module.exports = function(cmisSession, options) {
                         var bufferWriter = new BufferWriter();
                         response.pipe(bufferWriter);
                         
-                        
-                        
-                        
-//                    //compare(response, fs.createReadStream(filePath), function(err, isSame) {
-//
-//                    compareOld(response, filePath, function(err, isSame) {
-//                        // this will be called when response stream is exhausted
-//
-//                        if (err || isSame) {
-//                            callback(err);
-//                            return;
-//                        }
-//
-//                        // if not the same - write buffer to a file 
-//                        fs.writeFile(filePath, bufferWriter.buffer, function(err) {
-//                            if(err){
-//                                callback('error writing file ' + filePath + ' ' + err);
-//                                return;
-//                            }
-//                            grunt.log.ok('downloaded', filePath);
-//                            callback(null);
-//                        });
-//
-//                    });
+                        compare(response, new BufferReader(data), function(err, isSame) {
+                            // this will be called when response stream is exhausted by compare()
 
-
-                        getCheckSum(response, function(err, remoteCheckSum) {
-                            if (err) {
+                            if (err || isSame) {
                                 callback(err);
                                 return;
                             }
 
-                            getCheckSum(new BufferReader(data), function(err1, localCheckSum) {
-                                if (err1 || localCheckSum !== remoteCheckSum) {
-                                    // ignore if failed to get file CheckSum, just assume they are not the same
-                                    fs.writeFile(filePath, bufferWriter.buffer, function(err) {
-                                        if (err) {
-                                            callback('error writing file ' + filePath + ' ' + err);
-                                            return;
-                                        }
-                                        grunt.log.ok('downloaded', filePath);
-                                        callback(null);
-                                    });
-                                } else {
-                                    // dont download - contents are the same
-                                    callback(null);
+                            // if not the same - write buffer to a file 
+                            fs.writeFile(filePath, bufferWriter.buffer, function(err) {
+                                if(err){
+                                    callback('error writing file ' + filePath + ' ' + err);
+                                    return;
                                 }
+                                grunt.log.ok('downloaded', filePath);
+                                callback(null);
                             });
 
                         });
+
+
                     });
-
-
-
-
-
 
                 }
             });
