@@ -73,25 +73,6 @@ module.exports = function(cmisSession, options) {
         });
     }
     
-      function compareOld(data, filePath, callback) {
-        getCheckSum(data, function(err, remoteCheckSum) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            
-            getCheckSum(fs.createReadStream(filePath), function(err1, localCheckSum) {
-                if (err1) {
-                    // ignore if failed to get file CheckSum, just assume they are not the same
-                    console.log('error getting checksum', err1)
-                    callback(null, false);
-                    return;
-                }
-                callback(null, localCheckSum === remoteCheckSum);
-            });
-            
-        });
-    }
 
     function getCheckSum(stream, callback) {
         var hash = crypto.createHash('sha1');
@@ -177,28 +158,32 @@ module.exports = function(cmisSession, options) {
                     var bufferWriter = new BufferWriter();
                     response.pipe(bufferWriter);
 
-                    //compare(response, fs.createReadStream(filePath), function(err, isSame) {
-
-                    compareOld(response, filePath, function(err, isSame) {
-                        // this will be called when response stream is exhausted
-
-                        if (err || isSame) {
+                        
+                    getCheckSum(response, function(err, remoteCheckSum) {
+                        if (err) {
                             callback(err);
                             return;
                         }
 
-                        // if not the same - write buffer to a file 
-                        fs.writeFile(filePath, bufferWriter.buffer, function(err) {
-                            if(err){
-                                callback('error writing file ' + filePath + ' ' + err);
-                                return;
+                        getCheckSum(fs.createReadStream(filePath), function(err1, localCheckSum) {
+                            if (err1 || localCheckSum !== remoteCheckSum) {
+                                // ignore if failed to get file CheckSum, just assume they are not the same
+                                fs.writeFile(filePath, bufferWriter.buffer, function(err) {
+                                    if(err){
+                                        callback('error writing file ' + filePath + ' ' + err);
+                                        return;
+                                    }
+                                    grunt.log.ok('downloaded', filePath);
+                                    callback(null);
+                                });
+                            }else{
+                                // dont download - contents are the same
+                                callback(null);
                             }
-                            grunt.log.ok('downloaded', filePath);
-                            callback(null);
                         });
 
                     });
-
+                        
 
                 }
             });
