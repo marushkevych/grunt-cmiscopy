@@ -1,5 +1,4 @@
 var fs = require('fs');
-var grunt = require('grunt');
 var proxyquire = require('proxyquire');
 var httpStub = require('./stubs').httpStub;
 var FileUtilsFactory = proxyquire('../js/FileUtilsFactory', {
@@ -48,8 +47,9 @@ describe("FileUtils.downloadFile()", function() {
             expect(fs.readFileSync('tmp/test.txt').toString()).toBe("new file");
             done();
         });
-
-        grunt.file.delete('tmp/test.txt');
+        if(fs.existsSync('tmp/test.txt')){
+            fs.unlinkSync('tmp/test.txt');
+        }
         expect(fs.existsSync('tmp/test.txt')).toBeFalsy();
 
         // trigger server response

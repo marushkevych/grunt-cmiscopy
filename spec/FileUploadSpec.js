@@ -92,7 +92,7 @@ describe("FileUtils.uploadFile()", function() {
             // TODO stub checksum generator
             setTimeout(function(){
                 cmisRequest.resolve();
-            }, 1);
+            }, 100);
         });
 
 

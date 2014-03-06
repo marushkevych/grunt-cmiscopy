@@ -42,13 +42,13 @@ exports.CmisRequestMock = function(){
 
 
 exports.httpStub = {
-    heventHandlers: {},
+    eventHandlers: {},
     get: function(options, callback) {
         this.callback = callback;
         var that = this;
         return {
             on: function(event, handler) {
-                that.heventHandlers[event] = handler;
+                that.eventHandlers[event] = handler;
             }
         };
     },
@@ -60,10 +60,10 @@ exports.httpStub = {
     },
     reject: function(reason) {
         // call 'error' even handler
-        this.heventHandlers.error({message: reason});
+        this.eventHandlers.error({message: reason});
     },
     reset: function() {
-        this.heventHandlers = {};
+        this.eventHandlers = {};
         this.callback = null;
     }
 

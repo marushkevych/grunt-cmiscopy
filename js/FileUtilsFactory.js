@@ -72,6 +72,26 @@ module.exports = function(cmisSession, options) {
 
         });
     }
+    
+      function compareOld(data, filePath, callback) {
+        getCheckSum(data, function(err, remoteCheckSum) {
+            if (err) {
+                callback(err);
+                return;
+            }
+            
+            getCheckSum(fs.createReadStream(filePath), function(err1, localCheckSum) {
+                if (err1) {
+                    // ignore if failed to get file CheckSum, just assume they are not the same
+                    console.log('error getting checksum', err1)
+                    callback(null, false);
+                    return;
+                }
+                callback(null, localCheckSum === remoteCheckSum);
+            });
+            
+        });
+    }
 
     function getCheckSum(stream, callback) {
         var hash = crypto.createHash('sha1');
@@ -157,7 +177,9 @@ module.exports = function(cmisSession, options) {
                     var bufferWriter = new BufferWriter();
                     response.pipe(bufferWriter);
 
-                    compare(response, fs.createReadStream(filePath), function(err, isSame) {
+                    //compare(response, fs.createReadStream(filePath), function(err, isSame) {
+
+                    compareOld(response, filePath, function(err, isSame) {
                         // this will be called when response stream is exhausted
 
                         if (err || isSame) {
@@ -166,15 +188,15 @@ module.exports = function(cmisSession, options) {
                         }
 
                         // if not the same - write buffer to a file 
-                        var writer = fs.createWriteStream(filePath);
-                        writer.write(bufferWriter.buffer, function() {
+                        fs.writeFile(filePath, bufferWriter.buffer, function(err) {
+                            if(err){
+                                callback('error writing file ' + filePath + ' ' + err);
+                                return;
+                            }
                             grunt.log.ok('downloaded', filePath);
                             callback(null);
                         });
 
-                        writer.on('error', function(error) {
-                            callback('error writing file ' + filePath + ' ' + error);
-                        });
                     });
 
 
