@@ -6,7 +6,7 @@
  * Licensed under the MIT license.
  */
 'use strict';
-
+var cmis = require('cmis');
 var grunt = require('grunt');
 var actions = require('./Actions');
 var createFileProcessor = require('./FilePorcessor');
@@ -24,7 +24,8 @@ function trimSlashes(path){
     return removeTrailingSlash(removeLeadingSlash(path));
 }
 
-module.exports = function(cmisSession, options, pathArg, actionArg) {
+module.exports = function(options, pathArg, actionArg) {
+    var cmisSession = cmis.createSession(options.url);
     var cmisPath = removeTrailingSlash(options.cmisRoot);
     var localPath = removeTrailingSlash(options.localRoot);
     var action = actions.download; // default action
