@@ -20,7 +20,7 @@ function removeLeadingSlash(path) {
     return path.charAt(0) === '/' ? path.substring(1) : path;
 }
 
-function trimSlashes(path){
+function trimSlashes(path) {
     return removeTrailingSlash(removeLeadingSlash(path));
 }
 
@@ -44,69 +44,65 @@ module.exports = function(options, pathArg, actionArg) {
             throw new Error("Invalid action: " + actionArg);
         }
     }
-    
+
     cmisSession.setCredentials(options.username, options.password);
-    
+
     /**
      * @param callback - to be called with error or with no parameters if successful
      */
-    function runTask(callback){
-        
+    function runTask(callback) {
+
         // set global (default) error handlers
-        function defaultErrorHandler(err){
-            grunt.log.error();
-            grunt.log.error(err);
-            callback(err);               
+        function notOkHandler(response) {
+            var status = response.statusCode ? response.statusCode : "";
+            var error = response.error ? response.error : "";
+            callback('request failed: ' + status + " " + cmisPath + "\n" + error);
         }
-        cmisSession.setGlobalHandlers(defaultErrorHandler, defaultErrorHandler);
-        
+        function errorHandler(err) {
+            callback('problem with request: ' + err.message);
+        }
+        cmisSession.setGlobalHandlers(notOkHandler, errorHandler);
+
         grunt.log.ok('Connecting to', options.url);
         cmisSession.loadRepositories().ok(function() {
-            if(action === actions.list){
+            if (action === actions.list) {
                 grunt.log.ok('Listing contents of', cmisPath);
                 grunt.log.write('Gatherting info...');
-            }else{
+            } else {
                 grunt.log.ok('Detecting changes...');
             }
-            
+
             cmisSession.getObjectByPath(cmisPath).ok(function(object) {
                 var fileProcessor;
-                if(object.succinctProperties){
+                if (object.succinctProperties) {
                     // current CMIS
                     fileProcessor = createFileProcessor(cmisSession, options, cmisPath, localPath, action);
                 } else {
                     // legacy CMIS
                     fileProcessor = createLegacyFileProcessor(cmisSession, options, cmisPath, localPath, action);
                 }
-                
-                fileProcessor.process(object, function(err){
-                    if(err){
+
+                fileProcessor.process(object, function(err) {
+                    if (err) {
                         grunt.log.error();
-                        grunt.log.error(err);     
+                        grunt.log.error(err);
                         callback(err);
                         return;
                     }
-                    
-                    if(action === actions.list){
+
+                    if (action === actions.list) {
                         console.log();
-                        fileProcessor.documents.sort().forEach(function(doc){
+                        fileProcessor.documents.sort().forEach(function(doc) {
                             console.log(removeLeadingSlash(doc));
                         });
                     }
                     callback();
                 });
-                
-            }).notOk(function(responce) {
-                var status = responce.statusCode? responce.statusCode : "";
-                var message = 'failed to get content: '+ status + " " + cmisPath;
-                
-                grunt.log.error();
-                grunt.log.error(message);
-                callback(responce);
-            }).error(function(err) {
-                grunt.log.error();
-                grunt.log.error('failed to retrieve object:', cmisPath);
-                callback(err);
+
+            }).notOk(function(response) {
+                var status = response.statusCode ? response.statusCode : "";
+                var error = response.error ? response.error : "";
+                callback('failed to get content: ' + status + " " + cmisPath + "\n" + error);
             });
         });
     }
@@ -114,7 +110,6 @@ module.exports = function(options, pathArg, actionArg) {
 
     return {
         runTask: runTask,
-        
         // expose for testing
         cmisPath: cmisPath,
         localPath: localPath,

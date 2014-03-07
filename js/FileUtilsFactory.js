@@ -94,10 +94,6 @@ module.exports = function(cmisSession, options) {
         cmisSession.setContentStream(objectId, data, overwriteFlag, mimeType).ok(function() {
             grunt.log.ok("uploaded", filepath);
             callback();
-        }).notOk(function(err) {
-            callback(err);
-        }).error(function(err) {
-            callback(err);
         });
     }
 
