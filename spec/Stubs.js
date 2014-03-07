@@ -1,6 +1,6 @@
 var BufferReader = require('../js/BufferStreams').BufferReader;
 
-// CmisRequestMock constractor 
+// CmisRequestMock constructor 
 exports.CmisRequestMock = function(){
     
 //    this.notOkCallback = function(reason){

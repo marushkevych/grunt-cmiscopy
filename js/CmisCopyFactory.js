@@ -9,6 +9,8 @@
 
 var grunt = require('grunt');
 var actions = require('./Actions');
+var createFileProcessor = require('./FilePorcessor');
+var createLegacyFileProcessor = require('./FilePorcessorLegacyApi');
 
 function removeTrailingSlash(path) {
     return path.charAt(path.length - 1) === '/' ? path.substring(0, path.length - 1) : path;
@@ -22,7 +24,7 @@ function trimSlashes(path){
     return removeTrailingSlash(removeLeadingSlash(path));
 }
 
-module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
+module.exports = function(cmisSession, options, pathArg, actionArg) {
     var cmisPath = removeTrailingSlash(options.cmisRoot);
     var localPath = removeTrailingSlash(options.localRoot);
     var action = actions.download; // default action
@@ -68,10 +70,10 @@ module.exports = function(cmisSession, fileUtils, options, pathArg, actionArg) {
             cmisSession.getObjectByPath(cmisPath).ok(function(object) {
                 if(object.succinctProperties){
                     // current CMIS
-                    fileProcessor = require('./FilePorcessor')(cmisSession, fileUtils, cmisPath, localPath, action);
+                    fileProcessor = createFileProcessor(cmisSession, options, cmisPath, localPath, action);
                 } else {
                     // legacy CMIS
-                    fileProcessor = require('./FilePorcessorLegacyApi')(cmisSession, fileUtils, cmisPath, localPath, action);
+                    fileProcessor = createLegacyFileProcessor(cmisSession, options, cmisPath, localPath, action);
                 }
                 
                 fileProcessor.process(object, function(err){

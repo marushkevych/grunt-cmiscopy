@@ -1,9 +1,10 @@
 var actions = require('./Actions');
 var async = require('async');
 var grunt = require('grunt');
+var createFileUtils = require('./FileUtilsFactory');
 
-module.exports = function(cmisSession, fileUtils, cmisPath, localPath, action) {
-
+module.exports = function(cmisSession, options, cmisPath, localPath, action) {
+    var fileUtils = createFileUtils(cmisSession, options);
     var documents = [];
     
     function process(object, callback) {
