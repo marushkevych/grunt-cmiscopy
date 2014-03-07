@@ -139,7 +139,6 @@ module.exports = function(cmisSession, options) {
             });
         },
         downloadFile: function(localDir, fileName, objectId, mimeType, callback) {
-            console.log('downloadFile is called')
             var filePath = localDir + '/' + fileName;
 
             grunt.file.mkdir(localDir);

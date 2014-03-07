@@ -3,14 +3,14 @@ var proxyquire = require('proxyquire');
 
 // inject fileUtilsMock stub
 var fileUtilsMock = {};
-var createFileProcessor = proxyquire('../js/FilePorcessor', {
-    'createFileUtils': function() {
+var FilePorcessor = proxyquire('../js/FilePorcessor', {
+    './FileUtilsFactory': function() {
         return fileUtilsMock;
     }
 });
 
 var cmisCopyFactory = proxyquire('../js/CmisCopyFactory', {
-    'createFileProcessor': createFileProcessor
+    './FilePorcessor': FilePorcessor
 });
 
 
@@ -116,27 +116,25 @@ describe("CmisCopyTask with current CMIS API", function() {
         ]
     };
 
-    var cmisSession;
-
-    beforeEach(function() {
-        cmisSession = {
-            loadRepositories: jasmine.createSpy('loadRepositories').andReturn(new CmisRequestMock().resolve()),
-            setCredentials: jasmine.createSpy('setCredentials'),
-            setGlobalHandlers: jasmine.createSpy('setGlobalHandlers')
-        };
-    });
 
 
     describe("runTask", function() {
 
-
-        var done;
+        var cmisSession;
+        var loadRepositoriesRequest;
+        var getObjectByPathRequest;
 
         beforeEach(function() {
-            done = jasmine.createSpy('done');
+            loadRepositoriesRequest = new CmisRequestMock();
+            getObjectByPathRequest = new CmisRequestMock();
+            cmisSession = {
+                getObjectByPath: jasmine.createSpy('getObjectByPath').andReturn(getObjectByPathRequest),
+                loadRepositories: jasmine.createSpy('loadRepositories').andReturn(loadRepositoriesRequest),
+                setCredentials: jasmine.createSpy('setCredentials'),
+                setGlobalHandlers: jasmine.createSpy('setGlobalHandlers')
+            };
 
             fileUtilsMock.downloadFile = jasmine.createSpy('downloadFile').andCallFake(function(fileDir, fileName, objectId, mimType, callback) {
-                console.log('downloadFile mock is called')
                 callback(null);
             });
             fileUtilsMock.uploadFile = jasmine.createSpy('uploadFile').andCallFake(function(fileDir, fileName, objectId, mimType, callback) {
@@ -146,39 +144,35 @@ describe("CmisCopyTask with current CMIS API", function() {
 
 
         it('should download single file, when path to file is provided', function(done) {
-            //cmisSession.loadRepositories = jasmine.createSpy('loadRepositories').andReturn(new CmisRequestMock().resolve());
-            cmisSession.getObjectByPath = jasmine.createSpy('getObjectByPath').andCallFake(function(path) {
-                expect(path).toBe('/cmis/root/pages/test.html');
-                return new CmisRequestMock().resolve(testFileCmisProps);
-            });
-
             var cmisCopyTask = cmisCopyFactory(cmisSession, options, 'pages/test.html', null);
-
             cmisCopyTask.runTask(function(res) {
                 // expect success
                 expect(res).toBe(true);
+                expect(cmisSession.getObjectByPath).toHaveBeenCalledWith('/cmis/root/pages/test.html');
                 expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', 'testId', 'text/html', jasmine.any(Function));
                 expect(fileUtilsMock.downloadFile.calls.length).toEqual(1);
                 done();
             });
+
+            loadRepositoriesRequest.resolve();
+            getObjectByPathRequest.resolve(testFileCmisProps);
         });
 
-        xit('should fail if file or folder doesnt exist', function(done) {
-            cmisSession.getObjectByPath = jasmine.createSpy('getObjectByPath').andCallFake(function(path) {
-                expect(path).toBe('/cmis/root/pages/foo');
-                return new CmisRequestMock().reject();
-            });
-
-            var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages/foo', null);
+        it('should fail if file or folder doesnt exist', function(done) {
+            var cmisCopyTask = cmisCopyFactory(cmisSession, options, 'pages/foo', null);
             cmisCopyTask.runTask(function(res) {
                 // expect failure
                 expect(res).toBe(false);
+                expect(cmisSession.getObjectByPath).toHaveBeenCalledWith('/cmis/root/pages/foo');
                 expect(fileUtilsMock.downloadFile).not.toHaveBeenCalled();
                 done();
             });
+            
+            loadRepositoriesRequest.resolve();
+            getObjectByPathRequest.reject();
         });
 
-        xdescribe('should process folders recursively', function() {
+        describe('should process folders recursively', function() {
 
             beforeEach(function() {
 
@@ -225,7 +219,7 @@ describe("CmisCopyTask with current CMIS API", function() {
             it('should download all files in folder and subfolders when path to folder is provided', function(done) {
 
 
-                var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages');
+                var cmisCopyTask = cmisCopyFactory(cmisSession, options, 'pages');
                 cmisCopyTask.runTask(function(value) {
                     // expect success
                     expect(value).toBe(true);
@@ -236,11 +230,13 @@ describe("CmisCopyTask with current CMIS API", function() {
                     expect(fileUtilsMock.downloadFile.calls.length).toEqual(3);
                     done();
                 });
+                
+                loadRepositoriesRequest.resolve();
 
             });
 
             it('should upload all files in folder and subfolders when path to folder is provided', function(done) {
-                var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages', 'u');
+                var cmisCopyTask = cmisCopyFactory(cmisSession, options, 'pages', 'u');
                 cmisCopyTask.runTask(function(value) {
                     // expect success
                     expect(value).toBe(true);
@@ -250,10 +246,12 @@ describe("CmisCopyTask with current CMIS API", function() {
                     expect(fileUtilsMock.uploadFile.calls.length).toEqual(3);
                     done();
                 });
+                
+                loadRepositoriesRequest.resolve();
             });
 
             it('should download all files in all folders and subfolders when no path is provided', function(done) {
-                var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options);
+                var cmisCopyTask = cmisCopyFactory(cmisSession, options);
                 cmisCopyTask.runTask(function(value) {
                     expect(value).toBe(true);
                     expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root', 'index.html', 'indexId', 'text/html', jasmine.any(Function));
@@ -263,10 +261,12 @@ describe("CmisCopyTask with current CMIS API", function() {
                     expect(fileUtilsMock.downloadFile.calls.length).toEqual(4);
                     done();
                 });
+                
+                loadRepositoriesRequest.resolve();
             });
 
             it('should download all files in subfolder when path to subfolder is provided', function(done) {
-                var cmisCopyTask = cmisCopyFactory(cmisSession, fileUtilsMock, options, 'pages/subFolder');
+                var cmisCopyTask = cmisCopyFactory(cmisSession, options, 'pages/subFolder');
                 cmisCopyTask.runTask(function(value) {
                     // expect success
                     expect(value).toBe(true);
@@ -274,6 +274,8 @@ describe("CmisCopyTask with current CMIS API", function() {
                     expect(fileUtilsMock.downloadFile.calls.length).toEqual(1);
                     done();
                 });
+                
+                loadRepositoriesRequest.resolve();
             });
 
         });
