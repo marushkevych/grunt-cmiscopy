@@ -30,10 +30,18 @@ exports.CmisRequestMock = function(){
         return this;
     };
     
-    this.reject = function(reason){
+    this.reject = function (reason){
+        var that = this;
+        process.nextTick(function (){
+            that.notOkCallback(reason);
+        });
+        return this;
+    };
+    
+    this.fail = function(error){
         var that = this;
         process.nextTick(function(){
-            that.notOkCallback(reason);
+            that.errorCallback(error);
         });
         return this;
     };

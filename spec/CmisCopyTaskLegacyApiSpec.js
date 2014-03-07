@@ -165,7 +165,7 @@ describe("CmisCopyTask with legacy CMIS API", function() {
             }
 
             // path not found
-            return new CmisRequestMock().reject();
+            return new CmisRequestMock().reject({statusCode: 404});
         });
         cmisSession.getObject = jasmine.createSpy('getObject').andCallFake(function(objectId) {
 
@@ -208,7 +208,7 @@ describe("CmisCopyTask with legacy CMIS API", function() {
             if (objectId === 'emptyFolderId') {
                 return new CmisRequestMock().resolve({});
             }
-            return new CmisRequestMock().reject();
+            return new CmisRequestMock().reject("failed get object");
         });
 
     });
@@ -231,9 +231,9 @@ describe("CmisCopyTask with legacy CMIS API", function() {
 
             var cmisCopyTask = cmisCopyFactory(options, 'pages/test.html', null);
 
-            cmisCopyTask.runTask(function(res) {
+            cmisCopyTask.runTask(function(err) {
                 // expect success
-                expect(res).toBe(true);
+                expect(err).toBeFalsy();
                 expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', '12345', 'text/html', jasmine.any(Function));
                 expect(fileUtilsMock.downloadFile.calls.length).toEqual(1);
                 done();
@@ -245,9 +245,9 @@ describe("CmisCopyTask with legacy CMIS API", function() {
 
         it('should fail if file or folder doesnt exist', function(done) {
             var cmisCopyTask = cmisCopyFactory(options, 'pages/foo', null);
-            cmisCopyTask.runTask(function(res) {
+            cmisCopyTask.runTask(function(err) {
                 // expect failure
-                expect(res).toBe(false);
+                expect(err).toBeTruthy();
                 expect(fileUtilsMock.downloadFile).not.toHaveBeenCalled();
                 done();
             });
@@ -257,9 +257,9 @@ describe("CmisCopyTask with legacy CMIS API", function() {
 
         it('should download all files in folder and subfolders when path to folder is provided', function(done) {
             var cmisCopyTask = cmisCopyFactory(options, 'pages');
-            cmisCopyTask.runTask(function(value) {
+            cmisCopyTask.runTask(function(err) {
                 // expect success
-                expect(value).toBe(true);
+                expect(err).toBeFalsy();
 
                 expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', '12345', 'text/html', jasmine.any(Function));
                 expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', '678910', 'text/html', jasmine.any(Function));
@@ -274,9 +274,9 @@ describe("CmisCopyTask with legacy CMIS API", function() {
 
         it('should upload all files in folder and subfolders when path to folder is provided', function(done) {
             var cmisCopyTask = cmisCopyFactory(options, 'pages', 'u');
-            cmisCopyTask.runTask(function(value) {
+            cmisCopyTask.runTask(function(err) {
                 // expect success
-                expect(value).toBe(true);
+                expect(err).toBeFalsy();
                 expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', '12345', 'text/html', jasmine.any(Function));
                 expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', '678910', 'text/html', jasmine.any(Function));
                 expect(fileUtilsMock.uploadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', 'fileInSubfolder12345', 'text/html', jasmine.any(Function));
@@ -289,8 +289,8 @@ describe("CmisCopyTask with legacy CMIS API", function() {
 
         it('should download all files in all folders and subfolders when no path is provided', function(done) {
             var cmisCopyTask = cmisCopyFactory(options);
-            cmisCopyTask.runTask(function(value) {
-                expect(value).toBe(true);
+            cmisCopyTask.runTask(function(err) {
+                expect(err).toBeFalsy();
                 expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root', 'index.html', 'index12345', 'text/html', jasmine.any(Function));
                 expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', '12345', 'text/html', jasmine.any(Function));
                 expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', '678910', 'text/html', jasmine.any(Function));
@@ -304,9 +304,9 @@ describe("CmisCopyTask with legacy CMIS API", function() {
 
         it('should download all files in subfolder when path to subfolder is provided', function(done) {
             var cmisCopyTask = cmisCopyFactory(options, 'pages/subFolder');
-            cmisCopyTask.runTask(function(value) {
+            cmisCopyTask.runTask(function(err) {
                 // expect success
-                expect(value).toBe(true);
+                expect(err).toBeFalsy();
                 expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', 'fileInSubfolder12345', 'text/html', jasmine.any(Function));
                 expect(fileUtilsMock.downloadFile.calls.length).toEqual(1);
                 done();
@@ -317,9 +317,9 @@ describe("CmisCopyTask with legacy CMIS API", function() {
 
         it('should handle empty folder', function(done) {
             var cmisCopyTask = cmisCopyFactory(options, 'pages/emptyFolder');
-            cmisCopyTask.runTask(function(value) {
+            cmisCopyTask.runTask(function(err) {
                 // expect success
-                expect(value).toBe(true);
+                expect(err).toBeFalsy();
                 done();
             });
 
