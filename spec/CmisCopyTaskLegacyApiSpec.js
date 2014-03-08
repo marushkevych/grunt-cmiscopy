@@ -10,7 +10,7 @@ var FilePorcessorLegacyApi = proxyquire('../js/FilePorcessorLegacyApi', {
     }
 });
 
-var cmisCopyFactory = proxyquire('../js/CmisCopyFactory', {
+var CmisCopy = proxyquire('../js/CmisCopy', {
     './FilePorcessorLegacyApi': FilePorcessorLegacyApi,
     'cmis': {
         createSession: function() {
@@ -229,7 +229,7 @@ describe("CmisCopyTask with legacy CMIS API", function() {
 
         it('should download single file, when path to file is provided', function(done) {
 
-            var cmisCopyTask = cmisCopyFactory(options, 'pages/test.html', null);
+            var cmisCopyTask = CmisCopy.create(options, 'pages/test.html', null);
 
             cmisCopyTask.runTask(function(err) {
                 // expect success
@@ -244,7 +244,7 @@ describe("CmisCopyTask with legacy CMIS API", function() {
         });
 
         it('should fail if file or folder doesnt exist', function(done) {
-            var cmisCopyTask = cmisCopyFactory(options, 'pages/foo', null);
+            var cmisCopyTask = CmisCopy.create(options, 'pages/foo', null);
             cmisCopyTask.runTask(function(err) {
                 // expect failure
                 expect(err).toBeTruthy();
@@ -256,7 +256,7 @@ describe("CmisCopyTask with legacy CMIS API", function() {
         });
 
         it('should download all files in folder and subfolders when path to folder is provided', function(done) {
-            var cmisCopyTask = cmisCopyFactory(options, 'pages');
+            var cmisCopyTask = CmisCopy.create(options, 'pages');
             cmisCopyTask.runTask(function(err) {
                 // expect success
                 expect(err).toBeFalsy();
@@ -273,7 +273,7 @@ describe("CmisCopyTask with legacy CMIS API", function() {
         });
 
         it('should upload all files in folder and subfolders when path to folder is provided', function(done) {
-            var cmisCopyTask = cmisCopyFactory(options, 'pages', 'u');
+            var cmisCopyTask = CmisCopy.create(options, 'pages', 'u');
             cmisCopyTask.runTask(function(err) {
                 // expect success
                 expect(err).toBeFalsy();
@@ -288,7 +288,7 @@ describe("CmisCopyTask with legacy CMIS API", function() {
         });
 
         it('should download all files in all folders and subfolders when no path is provided', function(done) {
-            var cmisCopyTask = cmisCopyFactory(options);
+            var cmisCopyTask = CmisCopy.create(options);
             cmisCopyTask.runTask(function(err) {
                 expect(err).toBeFalsy();
                 expect(fileUtilsMock.downloadFile).toHaveBeenCalledWith('local/root', 'index.html', 'index12345', 'text/html', jasmine.any(Function));
@@ -303,7 +303,7 @@ describe("CmisCopyTask with legacy CMIS API", function() {
         });
 
         it('should download all files in subfolder when path to subfolder is provided', function(done) {
-            var cmisCopyTask = cmisCopyFactory(options, 'pages/subFolder');
+            var cmisCopyTask = CmisCopy.create(options, 'pages/subFolder');
             cmisCopyTask.runTask(function(err) {
                 // expect success
                 expect(err).toBeFalsy();
@@ -316,7 +316,7 @@ describe("CmisCopyTask with legacy CMIS API", function() {
         });
 
         it('should handle empty folder', function(done) {
-            var cmisCopyTask = cmisCopyFactory(options, 'pages/emptyFolder');
+            var cmisCopyTask = CmisCopy.create(options, 'pages/emptyFolder');
             cmisCopyTask.runTask(function(err) {
                 // expect success
                 expect(err).toBeFalsy();

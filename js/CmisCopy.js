@@ -24,7 +24,7 @@ function trimSlashes(path) {
     return removeTrailingSlash(removeLeadingSlash(path));
 }
 
-module.exports = function(options, pathArg, actionArg) {
+exports.create = function(options, pathArg, actionArg) {
     var cmisSession = cmis.createSession(options.url);
     var cmisPath = removeTrailingSlash(options.cmisRoot);
     var localPath = removeTrailingSlash(options.localRoot);
