@@ -74,8 +74,20 @@ exports.httpStub = {
         this.eventHandlers = {};
         this.callback = null;
     }
-
 };
 
-
+exports.fsStub = {
+    readFile: function(path, callback) {
+        this.callback = callback;
+    },
+    resolve: function(content) {
+        this.callback(null, content);
+    },
+    reject: function(reason) {
+        this.callback(reason);
+    },
+    reset: function() {
+        this.callback = null;
+    }
+};
 

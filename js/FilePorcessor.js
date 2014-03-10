@@ -1,10 +1,10 @@
 var actions = require('./Actions');
 var async = require('async');
 var grunt = require('grunt');
-var createFileUtils = require('./FileUtilsFactory');
+var FileIO = require('./FileIO');
 
 module.exports = function(cmisSession, options, cmisPath, localPath, action) {
-    var fileUtils = createFileUtils(cmisSession, options);
+    var fileIO = FileIO.create(cmisSession, options);
     var documents = [];
     
     function process(object, callback) {
@@ -65,9 +65,9 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
         }
 
         if (action === actions.upload) {
-            fileUtils.uploadFile(localDir, fileName, objectId, mimeType, callback);
+            fileIO.uploadFile(localDir, fileName, objectId, mimeType, callback);
         } else if (action === actions.download){
-            fileUtils.downloadFile(localDir, fileName, objectId, mimeType, callback);
+            fileIO.downloadFile(localDir, fileName, objectId, mimeType, callback);
         } else {
             // log progress
             grunt.log.write('.');

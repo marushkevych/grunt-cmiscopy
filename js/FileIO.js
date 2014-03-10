@@ -14,9 +14,9 @@ var BufferWriter = require('./BufferStreams').BufferWriter;
 var BufferReader = require('./BufferStreams').BufferReader;
 
 /**
- * Factory method creates FileUtils object.
+ * Factory method creates FileIO object.
  * 
- * TODO: Error handling - Translate Return Codes:
+ * TODO: Error handling - Translate http Status Codes:
  * invalidArgument              400
  * objectNotFound               404
  * permissionDenied             403
@@ -40,7 +40,7 @@ var BufferReader = require('./BufferStreams').BufferReader;
  * }
  * 
  */
-module.exports = function(cmisSession, options) {
+exports.create = function(cmisSession, options) {
 
     function getRemoteData(objectId, callback) {
         var URL = cmisSession.getContentStreamURL(objectId);

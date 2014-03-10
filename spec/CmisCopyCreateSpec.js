@@ -10,7 +10,7 @@ var CmisCopy = proxyquire('../js/CmisCopy', {
     }
 });
 
-describe("CmisCopyTask initialization", function() {
+describe("CmisCopy.create()", function() {
 
     var options = {
         url: 'http://alfresco-mycompany.com/alfresco/cmisbrowser',
