@@ -1,7 +1,7 @@
 {
   "name": "grunt-cmiscopy",
   "description": "copy files and folders to and from CMS",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/marushkevych/grunt-cmiscopy",
   "author": {
     "name": "Andrey Marushkevych",
