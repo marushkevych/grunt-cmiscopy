@@ -19,7 +19,7 @@ module.exports = function(grunt) {
                 'js/*.js',
             ],
             options: {
-                jshintrc: '.jshintrc',
+                jshintrc: '.jshintrc'
             },
         },
         // Before generating any new files, remove any previously-created files.
@@ -42,7 +42,7 @@ module.exports = function(grunt) {
         cmiscopy: {
             options: {
                 url: 'http://cmis.alfresco.com/cmisbrowser',
-                cmisRoot: '/Sites',
+                cmisRoot: '/Sites/swsdp/wiki',
                 localRoot: 'tmp',
                 username: 'admin',
                 password: 'admin'

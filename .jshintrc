@@ -9,5 +9,6 @@
   "undef": true,
   "boss": true,
   "eqnull": true,
-  "node": true
+  "node": true,
+  "latedef": "nofunc" // allow inner functions to be defined later than called
 }

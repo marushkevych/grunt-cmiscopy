@@ -11,6 +11,7 @@ var grunt = require('grunt');
 var actions = require('./Actions');
 var createFileProcessor = require('./FilePorcessor');
 var createLegacyFileProcessor = require('./FilePorcessorLegacyApi');
+var VersionRegistry = require('./VersionRegistry');
 
 function removeTrailingSlash(path) {
     return path.charAt(path.length - 1) === '/' ? path.substring(0, path.length - 1) : path;
@@ -95,6 +96,8 @@ exports.create = function(options, pathArg, actionArg) {
                         fileProcessor.documents.sort().forEach(function(doc) {
                             console.log(removeLeadingSlash(doc));
                         });
+                    }else{
+                        VersionRegistry.save();
                     }
                     callback();
                 });
