@@ -1,4 +1,5 @@
 var CmisRequestMock = require('./stubs').CmisRequestMock;
+var CmisFileProperties = require('../js/CmisFileProperties');
 var proxyquire = require('proxyquire');
 
 // inject fileIO and cmisSession stubs
@@ -133,6 +134,23 @@ describe("CmisCopyTask with current CMIS API", function() {
         var getObjectByPathRequest;
 
         beforeEach(function() {
+            
+            jasmine.getEnv().currentSpec.addMatchers({
+                toHaveBeenCalledWithCmisFileProperties: function(fileDir, cmisFileProperties) {
+                    var self = this, matched = false;
+                    this.actual.calls.forEach(function(call, i) {
+                        if (self.actual.argsForCall[i][0] === fileDir) {
+                            if(self.actual.argsForCall[i][1].getObjectId() === cmisFileProperties.getObjectId()){
+                                matched = true;
+                            }
+                        }
+                    });
+                    return matched;
+                }
+            });
+            
+            
+            
             loadRepositoriesRequest = new CmisRequestMock();
             getObjectByPathRequest = new CmisRequestMock();
             cmisSession.getObjectByPath = jasmine.createSpy('getObjectByPath').andReturn(getObjectByPathRequest);
@@ -140,10 +158,10 @@ describe("CmisCopyTask with current CMIS API", function() {
             cmisSession.setCredentials = jasmine.createSpy('setCredentials');
             cmisSession.setGlobalHandlers = jasmine.createSpy('setGlobalHandlers');
 
-            fileIOMock.downloadFile = jasmine.createSpy('downloadFile').andCallFake(function(fileDir, fileName, objectId, mimType, callback) {
+            fileIOMock.downloadFile = jasmine.createSpy('downloadFile').andCallFake(function(fileDir, cmisFileProperties, callback) {
                 callback(null);
             });
-            fileIOMock.uploadFile = jasmine.createSpy('uploadFile').andCallFake(function(fileDir, fileName, objectId, mimType, callback) {
+            fileIOMock.uploadFile = jasmine.createSpy('uploadFile').andCallFake(function(fileDir, cmisFileProperties, callback) {
                 callback(null);
             });
         });
@@ -155,7 +173,7 @@ describe("CmisCopyTask with current CMIS API", function() {
                 // expect success
                 expect(err).toBeFalsy();
                 expect(cmisSession.getObjectByPath).toHaveBeenCalledWith('/cmis/root/pages/test.html');
-                expect(fileIOMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', 'testId', 'text/html', jasmine.any(Function));
+                expect(fileIOMock.downloadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages', CmisFileProperties(testFileCmisProps));
                 expect(fileIOMock.downloadFile.calls.length).toEqual(1);
                 done();
             });
@@ -230,9 +248,9 @@ describe("CmisCopyTask with current CMIS API", function() {
                     // expect success
                     expect(err).toBeFalsy();
 
-                    expect(fileIOMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', 'testId', 'text/html', jasmine.any(Function));
-                    expect(fileIOMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', 'otherId', 'text/html', jasmine.any(Function));
-                    expect(fileIOMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', 'fileInSubfolderId', 'text/html', jasmine.any(Function));
+                    expect(fileIOMock.downloadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages', CmisFileProperties(testFileCmisProps));
+                    expect(fileIOMock.downloadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages', CmisFileProperties(otherFileCmisProps));
+                    expect(fileIOMock.downloadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages/subFolder', CmisFileProperties(fileInSubfolderProps));
                     expect(fileIOMock.downloadFile.calls.length).toEqual(3);
                     done();
                 });
@@ -246,9 +264,9 @@ describe("CmisCopyTask with current CMIS API", function() {
                 cmisCopyTask.runTask(function(err) {
                     // expect success
                     expect(err).toBeFalsy();
-                    expect(fileIOMock.uploadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', 'testId', 'text/html', jasmine.any(Function));
-                    expect(fileIOMock.uploadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', 'otherId', 'text/html', jasmine.any(Function));
-                    expect(fileIOMock.uploadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', 'fileInSubfolderId', 'text/html', jasmine.any(Function));
+                    expect(fileIOMock.uploadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages', CmisFileProperties(testFileCmisProps));
+                    expect(fileIOMock.uploadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages', CmisFileProperties(otherFileCmisProps));
+                    expect(fileIOMock.uploadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages/subFolder', CmisFileProperties(fileInSubfolderProps));
                     expect(fileIOMock.uploadFile.calls.length).toEqual(3);
                     done();
                 });
@@ -260,10 +278,10 @@ describe("CmisCopyTask with current CMIS API", function() {
                 var cmisCopyTask = CmisCopy.create(options);
                 cmisCopyTask.runTask(function(err) {
                     expect(err).toBeFalsy();
-                    expect(fileIOMock.downloadFile).toHaveBeenCalledWith('local/root', 'index.html', 'indexId', 'text/html', jasmine.any(Function));
-                    expect(fileIOMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'test.html', 'testId', 'text/html', jasmine.any(Function));
-                    expect(fileIOMock.downloadFile).toHaveBeenCalledWith('local/root/pages', 'other.html', 'otherId', 'text/html', jasmine.any(Function));
-                    expect(fileIOMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', 'fileInSubfolderId', 'text/html', jasmine.any(Function));
+                    expect(fileIOMock.downloadFile).toHaveBeenCalledWithCmisFileProperties('local/root', CmisFileProperties(indexFileCmisProps));
+                    expect(fileIOMock.downloadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages', CmisFileProperties(testFileCmisProps));
+                    expect(fileIOMock.downloadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages', CmisFileProperties(otherFileCmisProps));
+                    expect(fileIOMock.downloadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages/subFolder', CmisFileProperties(fileInSubfolderProps));
                     expect(fileIOMock.downloadFile.calls.length).toEqual(4);
                     done();
                 });
@@ -276,7 +294,7 @@ describe("CmisCopyTask with current CMIS API", function() {
                 cmisCopyTask.runTask(function(err) {
                     // expect success
                     expect(err).toBeFalsy();
-                    expect(fileIOMock.downloadFile).toHaveBeenCalledWith('local/root/pages/subFolder', 'fileInSubfolder.html', 'fileInSubfolderId', 'text/html', jasmine.any(Function));
+                    expect(fileIOMock.downloadFile).toHaveBeenCalledWithCmisFileProperties('local/root/pages/subFolder', CmisFileProperties(fileInSubfolderProps));
                     expect(fileIOMock.downloadFile.calls.length).toEqual(1);
                     done();
                 });

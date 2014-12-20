@@ -98,7 +98,10 @@ exports.create = function(cmisSession, options) {
     }
 
     return {
-        uploadFile: function(localDir, fileName, objectId, mimeType, callback) {
+        uploadFile: function(localDir, cmisFileProperties, callback) {
+            var fileName = cmisFileProperties.getName();
+            var objectId = cmisFileProperties.getObjectId();
+            var mimeType = cmisFileProperties.getMimeType();
             var filepath = localDir + '/' + fileName;
 
             fs.readFile(filepath, function(err, data) {
@@ -134,7 +137,9 @@ exports.create = function(cmisSession, options) {
 
             });
         },
-        downloadFile: function(localDir, fileName, objectId, mimeType, callback) {
+        downloadFile: function(localDir, cmisFileProperties, callback) {
+            var fileName = cmisFileProperties.getName();
+            var objectId = cmisFileProperties.getObjectId();
             var filePath = localDir + '/' + fileName;
 
             grunt.file.mkdir(localDir);

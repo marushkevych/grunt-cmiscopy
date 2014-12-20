@@ -2,6 +2,7 @@ var proxyquire = require('proxyquire');
 var CmisRequestMock = require('./stubs').CmisRequestMock;
 var httpStub = require('./stubs').httpStub;
 var fsStub = require('./stubs').fsStub;
+var CmisFileProperties = require('../js/CmisFileProperties');
 
 var FileIO = proxyquire('../js/FileIO', {
     'http': httpStub,
@@ -15,6 +16,14 @@ var options = {
     username: 'adminusername',
     password: 'adminpassword'
 };
+
+var cmisFileProperties = CmisFileProperties({
+    succinctProperties: {
+        "cmis:name": "test.txt",
+        "cmis:objectId": 'testId',
+        "cmis:contentStreamMimeType": 'text/plain'
+    }
+});
 
 describe("FileUtils.uploadFile()", function() {
     var cmisSession;
@@ -39,7 +48,7 @@ describe("FileUtils.uploadFile()", function() {
     
     it("should not fail if there was failure reading the file", function(done) {
 
-        fileIO.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+        fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBeFalsy();
             expect(cmisSession.setContentStream).not.toHaveBeenCalled();
             // TODO test st out - error message
@@ -66,7 +75,7 @@ describe("FileUtils.uploadFile()", function() {
         });
 
         it("should upload file if content is not the same", function(done) {
-            fileIO.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+            fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
                 expect(err).toBeFalsy();
                 expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'new content', true, 'text/plain');
                 expect(cmisSession.setContentStream.calls.length).toEqual(1);
@@ -86,7 +95,7 @@ describe("FileUtils.uploadFile()", function() {
 
         it("should not upload if content is the same", function(done) {
 
-            fileIO.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+            fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
                 expect(err).toBeFalsy();
                 expect(cmisSession.setContentStream).not.toHaveBeenCalled();
                 done();
@@ -97,7 +106,7 @@ describe("FileUtils.uploadFile()", function() {
         });
         
         it("should upload file when failed to get remote content with an error", function(done){
-            fileIO.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+            fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
                 expect(err).toBeFalsy();
                 expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'old content', true, 'text/plain');
                 expect(cmisSession.setContentStream.calls.length).toEqual(1);
@@ -110,7 +119,7 @@ describe("FileUtils.uploadFile()", function() {
         });
         
         it("should upload file when failed to get remote content with non 200 status code", function(done){
-            fileIO.uploadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+            fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
                 expect(err).toBeFalsy();
                 expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'old content', true, 'text/plain');
                 expect(cmisSession.setContentStream.calls.length).toEqual(1);

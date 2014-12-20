@@ -3,6 +3,7 @@ var async = require('async');
 var grunt = require('grunt');
 var FileIO = require('./FileIO');
 var VersionRegistry = require('./VersionRegistry');
+var cmisFilePropertiesFactory = require('./CmisFileProperties');
 
 module.exports = function(cmisSession, options, cmisPath, localPath, action) {
     var fileIO = FileIO.create(cmisSession, options);
@@ -76,6 +77,8 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
         var nodeId =  object.succinctProperties["alfcmis:nodeRef"];
         var version = object.succinctProperties["cmis:versionLabel"];
         
+        var cmisFileProperties = cmisFilePropertiesFactory(object);
+        
             
         var fileDir = path.slice(cmisPath.length + 1);
         var localDir;
@@ -87,20 +90,42 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
 
         if (action === actions.upload) {
             
-            // TODO dont upload if version doesnt match
-            // on successful upload get new version and save
-            fileIO.uploadFile(localDir, fileName, objectId, mimeType, callback);
+            // dont upload if version doesnt match
+//            if(version !== registry[nodeId]){
+//                grunt.log.error().error("Can't upload", fileDir + '/' + fileName, "file is out of sync. Please download latest version.");
+//                callback();
+//            }else{
+            
+                fileIO.uploadFile(localDir, cmisFileProperties, callback);
+//                fileIO.uploadFile(localDir, fileName, objectId, mimeType, function(err){
+//                    // update version registry on success
+//                    if(err){
+//                        callback(err);
+//                    }else{
+//                        // get new version
+//                        cmisSession.getObject(nodeId).ok(function(updatedObject) {
+//                            registry[nodeId] = updatedObject.succinctProperties["cmis:versionLabel"];
+//                            callback();
+//                        }).notOk(function(response) {
+//                            var status = response.statusCode ? response.statusCode : "";
+//                            var error = response.error ? response.error : "";
+//                            callback('failed to get content: ' + status + " " + cmisPath + "\n" + error);
+//                        });
+//                    }
+//                });
+//            }
             
         } else if (action === actions.download){
-            fileIO.downloadFile(localDir, fileName, objectId, mimeType, function(err){
-                // update version registry on success
-                if(err){
-                    callback(err);
-                }else{
-                    registry[nodeId] = version;
-                    callback();
-                }
-            });
+            fileIO.downloadFile(localDir, cmisFileProperties, callback);
+//            fileIO.downloadFile(localDir, fileName, objectId, mimeType, function(err){
+//                // update version registry on success
+//                if(err){
+//                    callback(err);
+//                }else{
+//                    registry[nodeId] = version;
+//                    callback();
+//                }
+//            });
         } else {
             // log progress
             grunt.log.write('.');

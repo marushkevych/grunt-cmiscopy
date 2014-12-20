@@ -1,9 +1,11 @@
 var fs = require('fs');
 var proxyquire = require('proxyquire');
 var httpStub = require('./stubs').httpStub;
+var CmisFileProperties = require('../js/CmisFileProperties');
 var FileIO = proxyquire('../js/FileIO', {
     'http': httpStub
 });
+
 
 
 var options = {
@@ -13,6 +15,14 @@ var options = {
     username: 'adminusername',
     password: 'adminpassword'
 };
+
+var cmisFileProperties = CmisFileProperties({
+    succinctProperties: {
+        "cmis:name": "test.txt",
+        "cmis:objectId": 'testId',
+        "cmis:contentStreamMimeType": 'text/plain'
+    }
+});
 
 describe("FileUtils.downloadFile()", function() {
     var cmisSession;
@@ -42,7 +52,7 @@ describe("FileUtils.downloadFile()", function() {
     });
 
     it("should download file if doesnt exist locally", function(done) {
-        fileIO.downloadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+        fileIO.downloadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBeFalsy();
             expect(fs.readFileSync('tmp/test.txt').toString()).toBe("new file");
             done();
@@ -57,7 +67,7 @@ describe("FileUtils.downloadFile()", function() {
     });
 
     it("should overwrite file if exist locally but contents is different", function(done) {
-        fileIO.downloadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+        fileIO.downloadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBeFalsy();
             expect(fs.readFileSync('tmp/test.txt').toString()).toBe("new content");
             done();
@@ -72,7 +82,7 @@ describe("FileUtils.downloadFile()", function() {
 
     it("should not overwrite file if file content is the same", function(done) {
         var mtime;
-        fileIO.downloadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+        fileIO.downloadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBeFalsy();
             // file should not have been modified
             expect(fs.statSync('tmp/test.txt').mtime.getTime()).toBe(mtime);
@@ -90,7 +100,7 @@ describe("FileUtils.downloadFile()", function() {
     });
 
     it("should ignore if http status is not 200", function(done) {
-        fileIO.downloadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+        fileIO.downloadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBeFalsy();
             expect(fs.readFileSync('tmp/test.txt').toString()).toBe("old content");
             // TODO test st out - error message
@@ -104,7 +114,7 @@ describe("FileUtils.downloadFile()", function() {
     });
 
     it("should fail if http request fails with error", function(done) {
-        fileIO.downloadFile('tmp', 'test.txt', 'testId', 'text/plain', function(err) {
+        fileIO.downloadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBe("some error");
             // TODO test st out - error message
             done();

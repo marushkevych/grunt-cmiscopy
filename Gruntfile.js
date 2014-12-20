@@ -9,7 +9,13 @@
 'use strict';
 
 module.exports = function(grunt) {
-
+    // Catch unhandled exceptions and show the stack trace. This is most
+    // useful when running the jasmine specs.
+    process.on('uncaughtException', function(e) {
+        grunt.log.error('Caught unhandled exception: ' + e.toString());
+        grunt.log.error(e.stack);
+    });
+  
     // Project configuration.
     grunt.initConfig({
         jshint: {
@@ -43,6 +49,8 @@ module.exports = function(grunt) {
             options: {
                 url: 'http://cmis.alfresco.com/cmisbrowser',
                 cmisRoot: '/Sites/swsdp/wiki',
+//                url: 'http://alfresco-www-dev.webdev.valuex.com/alfresco/cmisbrowser',
+//                cmisRoot: '/Sites/speedpass/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/pages/sign-up',
                 localRoot: 'tmp',
                 username: 'admin',
                 password: 'admin'
