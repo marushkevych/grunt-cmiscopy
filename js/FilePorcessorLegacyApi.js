@@ -29,21 +29,21 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
 
         cmisSession.getObjectByPath(cmisPath).ok(function(collection) {
             // find file object in collection
-            var fileProps;
+            var match;
             collection.objects.forEach(function(entry) {
                 //console.log('comparing ', entry.object.properties["cmis:name"].value, 'with', fileName)
                 if (entry.object.properties["cmis:name"].value === fileName) {
-                    fileProps = entry.object.properties;
+                    match = entry;
                 }
             });
-            if (fileProps) {
+            if (match) {
                 // if type is foler - it must be an empty folder
-                if(fileProps["cmis:baseTypeId"].value === 'cmis:folder'){
+                if(match.object.properties["cmis:baseTypeId"].value === 'cmis:folder'){
                     callback();
                     return;
                 }
                 
-                processFile(cmisPath, fileProps, callback);
+                processFile(cmisPath, cmisFilePropertiesFactory(match), callback);
             } else {
                 // file not found
                 callback('File not found:', cmisPath + '/' + fileName);
@@ -52,21 +52,21 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
     }
 
     // create function to run with async.parallel()
-    function createTask(parentPath, nodeProps) {
+    function createTask(parentPath, node) {
         return function(callback) {
-            if (nodeProps["cmis:baseTypeId"].value === 'cmis:folder') {
+            if (node.object.properties["cmis:baseTypeId"].value === 'cmis:folder') {
                 // get collection
-                cmisSession.getObject(nodeProps['cmis:objectId'].value).ok(function(collection) {
+                cmisSession.getObject(node.object.properties['cmis:objectId'].value).ok(function(collection) {
                     // check if collection is empty
                     if(collection.objects == null){
                         callback();
                         return;
                     }
                     
-                    processFolder(nodeProps['cmis:path'].value, collection, callback);
+                    processFolder(node.object.properties['cmis:path'].value, collection, callback);
                 });
             } else {
-                processFile(parentPath, nodeProps, callback);
+                processFile(parentPath, cmisFilePropertiesFactory(node), callback);
             }
         };
     }
@@ -75,7 +75,7 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
     function processFolder(path, collection, callback) {
         var tasks = [];
         collection.objects.forEach(function(entry) {
-            tasks.push(createTask(path, entry.object.properties));
+            tasks.push(createTask(path, entry));
         });
 
         async.parallel(tasks, function(err, results) {
@@ -83,17 +83,7 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
         });
     }
 
-    function processFile(path, fileProps, callback) {
-        var fileName = fileProps["cmis:name"].value;
-        var objectId = fileProps["cmis:objectId"].value;
-        var mimeType = fileProps["cmis:contentStreamMimeType"].value;
-        var cmisFileProperties = cmisFilePropertiesFactory({object:{properties:fileProps}});
-        
-//        var version = fileProps["cmis:versionLabel"].value;
-//        var nodeId = fileProps["alfcmis:nodeRef"].value;
-//        
-//        var registry = require('./VersionRegistry').getRegistry('cmisregistry.json');
-        
+    function processFile(path, cmisFileProperties, callback) {
 
         var fileDir = path.slice(cmisPath.length + 1);
         var localDir;
@@ -130,7 +120,7 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
             // log progress
             grunt.log.write('.');
             
-            documents.push(fileDir + '/' + fileName);
+            documents.push(fileDir + '/' + cmisFileProperties.getName());
             callback();
         }
     }    
