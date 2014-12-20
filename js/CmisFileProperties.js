@@ -1,5 +1,5 @@
 /* 
- * Factory to create Canonical representation of CMIS file (independent of CMIS dialect)
+ * Factory to create Canonical representation of CMIS document (independent of CMIS dialect)
  */
 module.exports = CmisFilePropertiesFactory;
 
@@ -23,6 +23,18 @@ function CmisFilePropertiesFactory(cmisObject){
         },
         getNodeId: function(){
             return isModernCmis ? cmisObject.succinctProperties["alfcmis:nodeRef"] : cmisObject.object.properties["alfcmis:nodeRef"].value;
+        },
+        getPath: function(){
+            return isModernCmis ? cmisObject.succinctProperties["cmis:path"] : cmisObject.object.properties["cmis:path"].value;
+        },
+        getType: function(){
+            return isModernCmis ? cmisObject.succinctProperties["cmis:baseTypeId"] : cmisObject.object.properties["cmis:baseTypeId"].value;
+        },
+        isFolder: function(){
+            return this.getType() === 'cmis:folder';
+        },
+        isDocument: function(){
+            return this.getType() === 'cmis:document';            
         },
         
         /**

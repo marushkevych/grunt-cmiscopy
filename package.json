@@ -47,6 +47,7 @@
   "dependencies": {
     "async": "~0.2.10",
     "cmis": "~0.1.2",
-    "jsonfile": "^2.0.0"
+    "jsonfile": "^2.0.0",
+    "underscore": "^1.7.0"
   }
 }

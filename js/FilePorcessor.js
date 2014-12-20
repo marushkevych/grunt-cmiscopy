@@ -20,10 +20,11 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
      *      If error, pass error as an argument.
      */
     function process(object, callback) {
-        if (object.succinctProperties['cmis:baseTypeId'] === 'cmis:document') {
-            processSingleFile(object, callback);
+        var cmisFileProperties = cmisFilePropertiesFactory(object);
+        if (cmisFileProperties.isDocument()) {
+            processSingleFile(cmisFileProperties, callback);
         } else {
-            processFolder(object, callback);
+            processFolder(cmisFileProperties, callback);
         }
     }
 
@@ -33,33 +34,33 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
     };
     
     
-    function processSingleFile(object, callback) {
+    function processSingleFile(cmisFileProperties, callback) {
         // get parent path and file name
-        var fileName = object.succinctProperties['cmis:name'];
+        var fileName = cmisFileProperties.getName();
         var lastSlashIndex = cmisPath.lastIndexOf('/' + fileName);
         cmisPath = cmisPath.slice(0, lastSlashIndex);
         localPath = localPath.slice(0, localPath.lastIndexOf('/' + fileName));
 
-        processFile(cmisPath, object, callback);
+        processFile(cmisPath, cmisFileProperties, callback);
     }
 
     // create function to run with async.parallel()
-    function createTask(parentPath, object) {
+    function createTask(parentPath, cmisFileProperties) {
         return function(callback) {
-            if (object.succinctProperties["cmis:baseTypeId"] === 'cmis:folder') {
-                processFolder(object, callback);
+            if (cmisFileProperties.isFolder()) {
+                processFolder(cmisFileProperties, callback);
             } else {
-                processFile(parentPath, object, callback);
+                processFile(parentPath, cmisFileProperties, callback);
             }
         };
     }
 
-    function processFolder(object, callback) {
+    function processFolder(cmisFileProperties, callback) {
         
-        cmisSession.getChildren(object.succinctProperties['cmis:objectId']).ok(function(children) {
+        cmisSession.getChildren(cmisFileProperties.getObjectId()).ok(function(children) {
                 var tasks = [];
                 children.objects.forEach(function(entry) {
-                        tasks.push(createTask(object.succinctProperties['cmis:path'], entry.object));
+                        tasks.push(createTask( cmisFileProperties.getPath(), cmisFilePropertiesFactory(entry.object) ));
                 });
 
                 async.parallel(tasks, function(err, results) {
@@ -69,17 +70,8 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
         
     }
 
-    function processFile(path, object, callback) {
-        var fileName = object.succinctProperties["cmis:name"];
-        var objectId = object.succinctProperties["cmis:objectId"];
-        var mimeType = object.succinctProperties["cmis:contentStreamMimeType"];
+    function processFile(path, cmisFileProperties, callback) {
         
-        var nodeId =  object.succinctProperties["alfcmis:nodeRef"];
-        var version = object.succinctProperties["cmis:versionLabel"];
-        
-        var cmisFileProperties = cmisFilePropertiesFactory(object);
-        
-            
         var fileDir = path.slice(cmisPath.length + 1);
         var localDir;
         if (fileDir) {
@@ -130,7 +122,7 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
             // log progress
             grunt.log.write('.');
             
-            documents.push(fileDir + '/' + fileName);
+            documents.push(fileDir + '/' + cmisFileProperties.getName());
             callback();
         }
     }    

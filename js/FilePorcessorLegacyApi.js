@@ -3,6 +3,7 @@ var async = require('async');
 var grunt = require('grunt');
 var FileIO = require('./FileIO');
 var cmisFilePropertiesFactory = require('./CmisFileProperties');
+var _ = require('underscore');
 
 module.exports = function(cmisSession, options, cmisPath, localPath, action) {
     var fileIO = FileIO.create(cmisSession, options);
@@ -29,21 +30,19 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
 
         cmisSession.getObjectByPath(cmisPath).ok(function(collection) {
             // find file object in collection
-            var match;
-            collection.objects.forEach(function(entry) {
-                //console.log('comparing ', entry.object.properties["cmis:name"].value, 'with', fileName)
-                if (entry.object.properties["cmis:name"].value === fileName) {
-                    match = entry;
-                }
+            var match = _.find(collection.objects, function(entry){
+                return entry.object.properties["cmis:name"].value === fileName;
             });
+            
             if (match) {
+                var cmisFileProperties = cmisFilePropertiesFactory(match);
                 // if type is foler - it must be an empty folder
-                if(match.object.properties["cmis:baseTypeId"].value === 'cmis:folder'){
+                if(cmisFileProperties.isFolder()){
                     callback();
                     return;
                 }
                 
-                processFile(cmisPath, cmisFilePropertiesFactory(match), callback);
+                processFile(cmisPath, cmisFileProperties, callback);
             } else {
                 // file not found
                 callback('File not found:', cmisPath + '/' + fileName);
@@ -52,21 +51,21 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
     }
 
     // create function to run with async.parallel()
-    function createTask(parentPath, node) {
+    function createTask(parentPath, cmisFileProperties) {
         return function(callback) {
-            if (node.object.properties["cmis:baseTypeId"].value === 'cmis:folder') {
+            if (cmisFileProperties.isFolder()) {
                 // get collection
-                cmisSession.getObject(node.object.properties['cmis:objectId'].value).ok(function(collection) {
+                cmisSession.getObject(cmisFileProperties.getObjectId()).ok(function(collection) {
                     // check if collection is empty
                     if(collection.objects == null){
                         callback();
                         return;
                     }
                     
-                    processFolder(node.object.properties['cmis:path'].value, collection, callback);
+                    processFolder(cmisFileProperties.getPath(), collection, callback);
                 });
             } else {
-                processFile(parentPath, cmisFilePropertiesFactory(node), callback);
+                processFile(parentPath, cmisFileProperties, callback);
             }
         };
     }
@@ -75,7 +74,7 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
     function processFolder(path, collection, callback) {
         var tasks = [];
         collection.objects.forEach(function(entry) {
-            tasks.push(createTask(path, entry));
+            tasks.push(createTask(path, cmisFilePropertiesFactory(entry)));
         });
 
         async.parallel(tasks, function(err, results) {
