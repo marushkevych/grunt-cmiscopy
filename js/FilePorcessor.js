@@ -2,12 +2,10 @@ var actions = require('./Actions');
 var async = require('async');
 var grunt = require('grunt');
 var FileIO = require('./FileIO');
-var VersionRegistry = require('./VersionRegistry');
 var cmisFilePropertiesFactory = require('./CmisFileProperties');
 
 module.exports = function(cmisSession, options, cmisPath, localPath, action) {
     var fileIO = FileIO.create(cmisSession, options);
-    var registry = VersionRegistry.getRegistry('cmisregistry.json');
     var documents = [];
     
     /**

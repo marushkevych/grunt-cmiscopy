@@ -4,12 +4,17 @@ var grunt = require('grunt');
 var FILE_NAME = 'cmisregistry.json';
 var registry;
 
-exports.getRegistry = function() {
-    if(registry == null){
-        return init();
-    }
+init();
+
+
+exports.setVersion = function(documentId, version){
+    registry[documentId] = version;
     
-    return registry;
+    // TODO - save to file (non blocking)
+};
+
+exports.hasVersion = function(documentId, version){
+    return registry[documentId] === version;
 };
 
 exports.save = function() {
@@ -33,5 +38,4 @@ function init(){
     }else{
         registry = {};
     }
-    return registry;
 }

@@ -3,7 +3,7 @@ var CmisRequestMock = require('./stubs').CmisRequestMock;
 var httpStub = require('./stubs').httpStub;
 var fsStub = require('./stubs').fsStub;
 var CmisFileProperties = require('../js/CmisFileProperties');
-var versionRegistry = require('../js/VersionRegistry').getRegistry();
+var versionRegistry = require('../js/VersionRegistry');
 
 var FileIO = proxyquire('../js/FileIO', {
     'http': httpStub,
@@ -48,7 +48,7 @@ describe("FileUtils.uploadFile()", function() {
         httpStub.reset();
         fsStub.reset();
         
-        versionRegistry.nodeId = "1.3";
+        versionRegistry.setVersion("nodeId", "1.3");
     });
     
     it("should not fail if there was failure reading the file", function(done) {
@@ -65,7 +65,19 @@ describe("FileUtils.uploadFile()", function() {
     });    
     
     it("should not upload if versions dont match", function(done) {
-        versionRegistry.nodeId = "1.2";
+        versionRegistry.setVersion("nodeId", "1.2");
+        fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
+            expect(err).toBeFalsy();
+            expect(fsStub.readFile).not.toHaveBeenCalled();
+            expect(httpStub.get).not.toHaveBeenCalled();
+            expect(cmisSession.setContentStream).not.toHaveBeenCalled();
+            done();
+        });
+
+    });
+    
+    it("should not upload if local version does not exist", function(done) {
+        versionRegistry.setVersion("nodeId", null);
         fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBeFalsy();
             expect(fsStub.readFile).not.toHaveBeenCalled();
