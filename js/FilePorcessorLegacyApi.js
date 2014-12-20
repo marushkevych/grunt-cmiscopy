@@ -83,7 +83,6 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
     }
 
     function processFile(path, cmisFileProperties, callback) {
-
         var fileDir = path.slice(cmisPath.length + 1);
         var localDir;
         if (fileDir) {
@@ -93,6 +92,7 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
         }
 
         if (action === actions.upload) {
+            cmisFileProperties.setParentPath(path);
             fileIO.uploadFile(localDir, cmisFileProperties, callback);
 //            fileIO.uploadFile(localDir, fileName, objectId, mimeType, function(err){
 //                // update version registry on success

@@ -1,3 +1,5 @@
+var _ = require('underscore');
+
 /* 
  * Factory to create Canonical representation of CMIS document (independent of CMIS dialect)
  */
@@ -6,6 +8,9 @@ module.exports = CmisFilePropertiesFactory;
 // factory
 function CmisFilePropertiesFactory(cmisObject){
     var isModernCmis = cmisObject.succinctProperties != null;
+    
+    // for legasy cmis need parent path to get file props
+    var parentPath;
     
     // CmisFileProperties
     return {
@@ -37,6 +42,15 @@ function CmisFilePropertiesFactory(cmisObject){
             return this.getType() === 'cmis:document';            
         },
         
+        // for legasy cmis need parent path to get file props
+        setParentPath: function(path){
+            parentPath = path;
+        },
+        
+        getParentPath: function(){
+            return parentPath;
+        },
+        
         /**
          * Retrieves latest version of this file using appropeiate cmis protocol depending on CMIS dialect
          * 
@@ -62,6 +76,20 @@ function CmisFilePropertiesFactory(cmisObject){
     
     function getLatestVersionLegacy(self, cmisSession, callback){
         
+        cmisSession.getObjectByPath(self.getParentPath()).ok(function(collection) {
+            // find file object in collection
+            var match = _.find(collection.objects, function(entry){
+                return entry.object.properties["cmis:name"].value === self.getName();
+            });
+            
+            if (match) {
+                var newVersion = match.object.properties["cmis:versionLabel"].value;
+                callback(null, newVersion);
+            } else {
+                // file not found
+                callback('failed to get new version');
+            }
+        });       
     }
     
 }
