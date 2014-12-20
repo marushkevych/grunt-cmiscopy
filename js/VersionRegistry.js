@@ -20,7 +20,6 @@ exports.hasVersion = function(documentId, version){
 exports.save = function() {
     try{
         jf.writeFileSync(FILE_NAME, registry);
-        console.log("registry saved");
     }catch(err){
         console.log(err.stack);
         throw err;

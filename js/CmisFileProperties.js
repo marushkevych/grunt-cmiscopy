@@ -43,16 +43,24 @@ function CmisFilePropertiesFactory(cmisObject){
          * @argument {CmisSession} cmisSession http://agea.github.io/CmisJS/docs/#!/api/CmisSession
          * @return {CmisFileProperties} new object
          */
-        getLatestVersion: function(cmisSession){
-            return isModernCmis ? getLatestVersionModern(cmisSession) : getLatestVersionLegacy(cmisSession);
+        getLatestVersion: function(cmisSession, callback){
+            return isModernCmis ? getLatestVersionModern(this, cmisSession, callback) : getLatestVersionLegacy(this, cmisSession, callback);
         }
     };
     
-    function getLatestVersionModern(cmisSession){
-        
+    function getLatestVersionModern(self, cmisSession, callback){
+        // get new version
+        cmisSession.getObject(self.getNodeId()).ok(function(updatedObject) {
+            var newVersion = updatedObject.succinctProperties["cmis:versionLabel"];
+            callback(null, newVersion);
+        }).notOk(function(response) {
+            var status = response.statusCode ? response.statusCode : "";
+            var error = response.error ? response.error : "";
+            callback('failed to get new version: ' + status + "\n" + error);
+        });
     }
     
-    function getLatestVersionLegacy(cmisSession){
+    function getLatestVersionLegacy(self, cmisSession, callback){
         
     }
     

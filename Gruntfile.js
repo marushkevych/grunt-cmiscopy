@@ -47,10 +47,10 @@ module.exports = function(grunt) {
         
         cmiscopy: {
             options: {
-//                url: 'http://cmis.alfresco.com/cmisbrowser',
-//                cmisRoot: '/Sites/swsdp/documentLibrary/Agency Files/Contracts',
-                url: 'http://alfresco-www-dev.webdev.valuex.com/alfresco/cmisbrowser',
-                cmisRoot: '/Sites/speedpass/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/test',
+                url: 'http://cmis.alfresco.com/cmisbrowser',
+                cmisRoot: '/Sites/swsdp/wiki',
+//                url: 'http://alfresco-www-dev.webdev.valuex.com/alfresco/cmisbrowser',
+//                cmisRoot: '/Sites/speedpass/documentLibrary/Alfresco Quick Start/Quick Start Editorial/root/test',
                 localRoot: 'tmp',
                 username: 'admin',
                 password: 'admin'

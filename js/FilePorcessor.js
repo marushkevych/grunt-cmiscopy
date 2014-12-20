@@ -79,43 +79,9 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
         }
 
         if (action === actions.upload) {
-            
-            // dont upload if version doesnt match
-//            if(version !== registry[nodeId]){
-//                grunt.log.error().error("Can't upload", fileDir + '/' + fileName, "file is out of sync. Please download latest version.");
-//                callback();
-//            }else{
-            
-                fileIO.uploadFile(localDir, cmisFileProperties, callback);
-//                fileIO.uploadFile(localDir, fileName, objectId, mimeType, function(err){
-//                    // update version registry on success
-//                    if(err){
-//                        callback(err);
-//                    }else{
-//                        // get new version
-//                        cmisSession.getObject(nodeId).ok(function(updatedObject) {
-//                            registry[nodeId] = updatedObject.succinctProperties["cmis:versionLabel"];
-//                            callback();
-//                        }).notOk(function(response) {
-//                            var status = response.statusCode ? response.statusCode : "";
-//                            var error = response.error ? response.error : "";
-//                            callback('failed to get content: ' + status + " " + cmisPath + "\n" + error);
-//                        });
-//                    }
-//                });
-//            }
-            
+            fileIO.uploadFile(localDir, cmisFileProperties, callback);
         } else if (action === actions.download){
             fileIO.downloadFile(localDir, cmisFileProperties, callback);
-//            fileIO.downloadFile(localDir, fileName, objectId, mimeType, function(err){
-//                // update version registry on success
-//                if(err){
-//                    callback(err);
-//                }else{
-//                    registry[nodeId] = version;
-//                    callback();
-//                }
-//            });
         } else {
             // log progress
             grunt.log.write('.');

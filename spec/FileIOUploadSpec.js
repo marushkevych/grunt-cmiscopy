@@ -33,12 +33,14 @@ describe("FileUtils.uploadFile()", function() {
     var cmisSession;
     var fileIO;
     var cmisRequest;
-    
+    var refreshVersionCmisRequest = new CmisRequestMock();
+
     beforeEach(function() {
         cmisRequest = new CmisRequestMock();
         cmisSession = {
             getContentStreamURL: jasmine.createSpy('getContentStreamURL').andReturn("http://cmis.alfresco.com/cmisbrowser/documentid"),
-            setContentStream: jasmine.createSpy('setContentStream').andReturn(cmisRequest)
+            setContentStream: jasmine.createSpy('setContentStream').andReturn(cmisRequest),
+            getObject: jasmine.createSpy('getObject').andReturn(refreshVersionCmisRequest)
         };
         
         fileIO = FileIO.create(cmisSession, options);
@@ -103,11 +105,14 @@ describe("FileUtils.uploadFile()", function() {
             expect(httpStub.get.mostRecentCall.args[0].auth).toBe('adminusername:adminpassword');
         });
 
-        it("should upload file if content is not the same", function(done) {
+        it("should upload file and track new version if content is not the same", function(done) {
+
+            
             fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
                 expect(err).toBeFalsy();
                 expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'new content', true, 'text/plain');
                 expect(cmisSession.setContentStream.calls.length).toEqual(1);
+                expect(versionRegistry.hasVersion("nodeId", "1.4")).toBeTruthy();
                 done();
             });
             fsStub.resolve('new content');
@@ -117,6 +122,7 @@ describe("FileUtils.uploadFile()", function() {
             // TODO stub checksum generator
             setTimeout(function(){
                 cmisRequest.resolve();
+                refreshVersionCmisRequest.resolve({succinctProperties: {"cmis:versionLabel": "1.4" }});
             }, 100);
         });
 
@@ -134,30 +140,35 @@ describe("FileUtils.uploadFile()", function() {
             httpStub.resolve("old content", 200);
         });
 
-        it("should upload file when failed to get remote content with an error", function(done){
+        it("should upload file and track new version when failed to get remote content with an error", function(done){
             fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
                 expect(err).toBeFalsy();
                 expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'old content', true, 'text/plain');
                 expect(cmisSession.setContentStream.calls.length).toEqual(1);
+                expect(versionRegistry.hasVersion("nodeId", "1.4")).toBeTruthy();
                 done();
             });
             fsStub.resolve('old content');
             httpStub.reject("some error");
             
             cmisRequest.resolve();
+            refreshVersionCmisRequest.resolve({succinctProperties: {"cmis:versionLabel": "1.4" }});
         });
         
-        it("should upload file when failed to get remote content with non 200 status code", function(done){
+        it("should upload file and track new version when failed to get remote content with non 200 status code", function(done){
             fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
                 expect(err).toBeFalsy();
                 expect(cmisSession.setContentStream).toHaveBeenCalledWith('testId', 'old content', true, 'text/plain');
                 expect(cmisSession.setContentStream.calls.length).toEqual(1);
+                expect(versionRegistry.hasVersion("nodeId", "1.4")).toBeTruthy();
                 done();
             });
             fsStub.resolve('old content');
             httpStub.resolve('some problem', 409);
             
+            
             cmisRequest.resolve();
+            refreshVersionCmisRequest.resolve({succinctProperties: {"cmis:versionLabel": "1.4" }});
         });
     });
     

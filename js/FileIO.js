@@ -91,11 +91,19 @@ exports.create = function(cmisSession, options) {
         });
     }
 
-    function doUpload(filepath, objectId, data, mimeType, callback) {
+    function doUpload(filepath, cmisFileProperties, data, callback) {
         var overwriteFlag = true;
-        cmisSession.setContentStream(objectId, data, overwriteFlag, mimeType).ok(function() {
+        cmisSession.setContentStream(cmisFileProperties.getObjectId(), data, overwriteFlag, cmisFileProperties.getMimeType()).ok(function() {
             grunt.log.ok("uploaded", filepath);
-            callback();
+            // track new version
+            cmisFileProperties.getLatestVersion(cmisSession, function(err, newVersion){
+                if(err){
+                    grunt.log.error("Could not refresh file version", filepath, err);
+                }else{
+                    versionRegistry.setVersion(cmisFileProperties.getNodeId(), newVersion);
+                }
+                callback();
+            });
         });
     }
 
@@ -103,7 +111,6 @@ exports.create = function(cmisSession, options) {
         uploadFile: function(localDir, cmisFileProperties, callback) {
             var fileName = cmisFileProperties.getName();
             var objectId = cmisFileProperties.getObjectId();
-            var mimeType = cmisFileProperties.getMimeType();
             var filepath = localDir + '/' + fileName;
             
             // dont upload if version doesnt match
@@ -128,7 +135,7 @@ exports.create = function(cmisSession, options) {
                         // check if content is the same
                         compare(response, new BufferReader(data), function(err, isSame) {
                             if (err || !isSame) {
-                                doUpload(filepath, objectId, data, mimeType, callback);
+                                doUpload(filepath, cmisFileProperties, data, callback);
                             }
                             else
                             {
@@ -139,7 +146,7 @@ exports.create = function(cmisSession, options) {
 
                     } else {
                         // if failed to get remote data - just upload
-                        doUpload(filepath, objectId, data, mimeType, callback);
+                        doUpload(filepath, cmisFileProperties, data, callback);
                     }
 
                 });
