@@ -12,6 +12,7 @@ var grunt = require('grunt');
 var crypto = require('crypto');
 var BufferWriter = require('./BufferStreams').BufferWriter;
 var BufferReader = require('./BufferStreams').BufferReader;
+var versionRegistry = require('./VersionRegistry').getRegistry();
 
 /**
  * Factory method creates FileIO object.
@@ -41,6 +42,7 @@ var BufferReader = require('./BufferStreams').BufferReader;
  * 
  */
 exports.create = function(cmisSession, options) {
+    
 
     function getRemoteData(objectId, callback) {
         var URL = cmisSession.getContentStreamURL(objectId);
@@ -103,6 +105,16 @@ exports.create = function(cmisSession, options) {
             var objectId = cmisFileProperties.getObjectId();
             var mimeType = cmisFileProperties.getMimeType();
             var filepath = localDir + '/' + fileName;
+            
+            // dont upload if version doesnt match
+            console.log(cmisFileProperties.getVersion(), versionRegistry);
+            if(cmisFileProperties.getVersion() !== versionRegistry[cmisFileProperties.getNodeId()]){
+                grunt.log.error().error("Can't upload", filepath, " - out of sync. Please download latest version.");
+                callback();
+                return;
+            }         
+            
+            
 
             fs.readFile(filepath, function(err, data) {
 

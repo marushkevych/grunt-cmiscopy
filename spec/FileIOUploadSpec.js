@@ -3,6 +3,7 @@ var CmisRequestMock = require('./stubs').CmisRequestMock;
 var httpStub = require('./stubs').httpStub;
 var fsStub = require('./stubs').fsStub;
 var CmisFileProperties = require('../js/CmisFileProperties');
+var versionRegistry = require('../js/VersionRegistry').getRegistry();
 
 var FileIO = proxyquire('../js/FileIO', {
     'http': httpStub,
@@ -21,9 +22,12 @@ var cmisFileProperties = CmisFileProperties({
     succinctProperties: {
         "cmis:name": "test.txt",
         "cmis:objectId": 'testId',
-        "cmis:contentStreamMimeType": 'text/plain'
+        "cmis:contentStreamMimeType": 'text/plain',
+        "cmis:versionLabel": "1.3",
+        "alfcmis:nodeRef": 'nodeId'
     }
 });
+
 
 describe("FileUtils.uploadFile()", function() {
     var cmisSession;
@@ -31,9 +35,12 @@ describe("FileUtils.uploadFile()", function() {
     var cmisRequest;
     
     beforeEach(function() {
+        cmisRequest = new CmisRequestMock();
         cmisSession = {
-            getContentStreamURL: jasmine.createSpy('getContentStreamURL').andReturn("http://cmis.alfresco.com/cmisbrowser/documentid")
+            getContentStreamURL: jasmine.createSpy('getContentStreamURL').andReturn("http://cmis.alfresco.com/cmisbrowser/documentid"),
+            setContentStream: jasmine.createSpy('setContentStream').andReturn(cmisRequest)
         };
+        
         fileIO = FileIO.create(cmisSession, options);
 
         spyOn(fsStub, 'readFile').andCallThrough();        
@@ -41,9 +48,7 @@ describe("FileUtils.uploadFile()", function() {
         httpStub.reset();
         fsStub.reset();
         
-        cmisRequest = new CmisRequestMock();
-        cmisSession.setContentStream = jasmine.createSpy('setContentStream').andReturn(cmisRequest);
-
+        versionRegistry.nodeId = "1.3";
     });
     
     it("should not fail if there was failure reading the file", function(done) {
@@ -58,6 +63,18 @@ describe("FileUtils.uploadFile()", function() {
         fsStub.reject('an error reading file');
 
     });    
+    
+    it("should not upload if versions dont match", function(done) {
+        versionRegistry.nodeId = "1.2";
+        fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
+            expect(err).toBeFalsy();
+            expect(fsStub.readFile).not.toHaveBeenCalled();
+            expect(httpStub.get).not.toHaveBeenCalled();
+            expect(cmisSession.setContentStream).not.toHaveBeenCalled();
+            done();
+        });
+
+    });
     
     describe("when able to read local file", function(){
         
@@ -104,7 +121,7 @@ describe("FileUtils.uploadFile()", function() {
             fsStub.resolve('old content');
             httpStub.resolve("old content", 200);
         });
-        
+
         it("should upload file when failed to get remote content with an error", function(done){
             fileIO.uploadFile('tmp', cmisFileProperties, function(err) {
                 expect(err).toBeFalsy();

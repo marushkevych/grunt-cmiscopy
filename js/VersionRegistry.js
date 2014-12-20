@@ -1,25 +1,20 @@
 var jf = require('jsonfile');
 var grunt = require('grunt');
 
+var FILE_NAME = 'cmisregistry.json';
 var registry;
-var fileName;
 
-exports.getRegistry = function(file) {
+exports.getRegistry = function() {
     if(registry == null){
-        return init(file);
+        return init();
     }
     
     return registry;
 };
 
 exports.save = function() {
-    
-    if(fileName == null){
-        // nothing to save
-        return;
-    }
     try{
-        jf.writeFileSync(fileName, registry);
+        jf.writeFileSync(FILE_NAME, registry);
         console.log("registry saved");
     }catch(err){
         console.log(err.stack);
@@ -27,11 +22,10 @@ exports.save = function() {
     }
 };
 
-function init(file){
-    fileName = file;
-    if(grunt.file.exists(file)){
+function init(){
+    if(grunt.file.exists(FILE_NAME)){
         try{
-            registry = jf.readFileSync(file);
+            registry = jf.readFileSync(FILE_NAME);
         }catch(err){
             console.log(err.stack);
             throw err;
