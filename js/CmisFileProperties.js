@@ -5,24 +5,24 @@ module.exports = CmisFilePropertiesFactory;
 
 // factory
 function CmisFilePropertiesFactory(cmisObject){
-    var properties = cmisObject.succinctProperties ? cmisObject.succinctProperties : cmisObject.object.properties;
+    var isModernCmis = cmisObject.succinctProperties != null;
     
     // CmisFileProperties
     return {
         getName: function(){
-            return properties["cmis:name"];
+            return isModernCmis ? cmisObject.succinctProperties["cmis:name"] : cmisObject.object.properties["cmis:name"].value;
         },
         getObjectId: function(){
-            return properties["cmis:objectId"];
+            return isModernCmis ? cmisObject.succinctProperties["cmis:objectId"] : cmisObject.object.properties["cmis:objectId"].value;
         },
         getMimeType: function(){
-            return properties["cmis:contentStreamMimeType"];
-        },
-        getNodeId: function(){
-            return properties["alfcmis:nodeRef"];
+            return isModernCmis ? cmisObject.succinctProperties["cmis:contentStreamMimeType"] : cmisObject.object.properties["cmis:contentStreamMimeType"].value;
         },
         getVersion: function(){
-            return properties["cmis:versionLabel"];
+            return isModernCmis ? cmisObject.succinctProperties["cmis:versionLabel"] : cmisObject.object.properties["cmis:versionLabel"].value;
+        },
+        getNodeId: function(){
+            return isModernCmis ? cmisObject.succinctProperties["alfcmis:nodeRef"] : cmisObject.object.properties["alfcmis:nodeRef"].value;
         },
         
         /**
@@ -32,7 +32,7 @@ function CmisFilePropertiesFactory(cmisObject){
          * @return {CmisFileProperties} new object
          */
         getLatestVersion: function(cmisSession){
-            return cmisObject.succinctProperties ? getLatestVersionModern(cmisSession) : getLatestVersionLegacy(cmisSession);
+            return isModernCmis ? getLatestVersionModern(cmisSession) : getLatestVersionLegacy(cmisSession);
         }
     };
     

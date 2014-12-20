@@ -2,6 +2,7 @@ var actions = require('./Actions');
 var async = require('async');
 var grunt = require('grunt');
 var FileIO = require('./FileIO');
+var cmisFilePropertiesFactory = require('./CmisFileProperties');
 
 module.exports = function(cmisSession, options, cmisPath, localPath, action) {
     var fileIO = FileIO.create(cmisSession, options);
@@ -86,6 +87,7 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
         var fileName = fileProps["cmis:name"].value;
         var objectId = fileProps["cmis:objectId"].value;
         var mimeType = fileProps["cmis:contentStreamMimeType"].value;
+        var cmisFileProperties = cmisFilePropertiesFactory({object:{properties:fileProps}});
         
 //        var version = fileProps["cmis:versionLabel"].value;
 //        var nodeId = fileProps["alfcmis:nodeRef"].value;
@@ -102,7 +104,7 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
         }
 
         if (action === actions.upload) {
-            fileIO.uploadFile(localDir, fileName, objectId, mimeType, callback);
+            fileIO.uploadFile(localDir, cmisFileProperties, callback);
 //            fileIO.uploadFile(localDir, fileName, objectId, mimeType, function(err){
 //                // update version registry on success
 //                if(err){
@@ -123,7 +125,7 @@ module.exports = function(cmisSession, options, cmisPath, localPath, action) {
             
         } else if (action === actions.download){
 //            registry[nodeId] = version;
-            fileIO.downloadFile(localDir, fileName, objectId, mimeType, callback);
+            fileIO.downloadFile(localDir, cmisFileProperties, callback);
         } else {
             // log progress
             grunt.log.write('.');
