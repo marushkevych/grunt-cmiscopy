@@ -173,6 +173,7 @@ exports.create = function(cmisSession, options) {
                             response.pipe(writer, {end: false});
                             response.on('end', function() {
                                 writer.end(function(){
+                                    versionRegistry.setVersion(cmisFileProperties.getNodeId(), cmisFileProperties.getVersion());
                                     grunt.log.ok('downloaded', filePath);
                                     callback(null);
                                 });
@@ -191,8 +192,14 @@ exports.create = function(cmisSession, options) {
                         compare(response, new BufferReader(data), function(err, isSame) {
                             // this will be called when response stream is exhausted by compare()
 
-                            if (err || isSame) {
+                            if (err) {
                                 callback(err);
+                                return;
+                            }
+                            
+                            if(isSame){
+                                versionRegistry.setVersion(cmisFileProperties.getNodeId(), cmisFileProperties.getVersion());
+                                callback();
                                 return;
                             }
 
@@ -202,6 +209,7 @@ exports.create = function(cmisSession, options) {
                                     callback('error writing file ' + filePath + ' ' + err);
                                     return;
                                 }
+                                versionRegistry.setVersion(cmisFileProperties.getNodeId(), cmisFileProperties.getVersion());
                                 grunt.log.ok('downloaded', filePath);
                                 callback(null);
                             });

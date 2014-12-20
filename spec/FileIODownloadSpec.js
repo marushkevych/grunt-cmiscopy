@@ -1,5 +1,6 @@
 var fs = require('fs');
 var proxyquire = require('proxyquire');
+var versionRegistry = require('../js/VersionRegistry');
 var httpStub = require('./stubs').httpStub;
 var CmisFileProperties = require('../js/CmisFileProperties');
 var FileIO = proxyquire('../js/FileIO', {
@@ -20,7 +21,9 @@ var cmisFileProperties = CmisFileProperties({
     succinctProperties: {
         "cmis:name": "test.txt",
         "cmis:objectId": 'testId',
-        "cmis:contentStreamMimeType": 'text/plain'
+        "cmis:contentStreamMimeType": 'text/plain',
+        "cmis:versionLabel": "1.3",
+        "alfcmis:nodeRef": 'nodeId'
     }
 });
 
@@ -36,6 +39,7 @@ describe("FileUtils.downloadFile()", function() {
 
         spyOn(httpStub, 'get').andCallThrough();
         httpStub.reset();
+        versionRegistry.setVersion("nodeId", "1.2");
     });
 
     afterEach(function() {
@@ -51,10 +55,12 @@ describe("FileUtils.downloadFile()", function() {
         expect(httpStub.get.mostRecentCall.args[0].auth).toBe('adminusername:adminpassword');
     });
 
-    it("should download file if doesnt exist locally", function(done) {
+    it("should download file and track version if file doesnt exist locally", function(done) {
+        versionRegistry.setVersion("nodeId", null);
         fileIO.downloadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBeFalsy();
             expect(fs.readFileSync('tmp/test.txt').toString()).toBe("new file");
+            expect(versionRegistry.hasVersion("nodeId", "1.3")).toBeTruthy();
             done();
         });
         if(fs.existsSync('tmp/test.txt')){
@@ -66,10 +72,11 @@ describe("FileUtils.downloadFile()", function() {
         httpStub.resolve("new file", 200);
     });
 
-    it("should overwrite file if exist locally but contents is different", function(done) {
+    it("should overwrite file and track version if exist locally but contents is different", function(done) {
         fileIO.downloadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBeFalsy();
             expect(fs.readFileSync('tmp/test.txt').toString()).toBe("new content");
+            expect(versionRegistry.hasVersion("nodeId", "1.3")).toBeTruthy();
             done();
         });
 
@@ -80,12 +87,13 @@ describe("FileUtils.downloadFile()", function() {
         httpStub.resolve("new content", 200);
     });
 
-    it("should not overwrite file if file content is the same", function(done) {
+    it("should not overwrite file if file content is the same, but should track version", function(done) {
         var mtime;
         fileIO.downloadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBeFalsy();
             // file should not have been modified
             expect(fs.statSync('tmp/test.txt').mtime.getTime()).toBe(mtime);
+            expect(versionRegistry.hasVersion("nodeId", "1.3")).toBeTruthy();
             done();
         });
 
@@ -99,10 +107,11 @@ describe("FileUtils.downloadFile()", function() {
         }, 1000);
     });
 
-    it("should ignore if http status is not 200", function(done) {
+    it("should ignore if http status is not 200, should not change version in registry", function(done) {
         fileIO.downloadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBeFalsy();
             expect(fs.readFileSync('tmp/test.txt').toString()).toBe("old content");
+            expect(versionRegistry.hasVersion("nodeId", "1.2")).toBeTruthy();
             // TODO test st out - error message
             done();
         });
@@ -116,6 +125,8 @@ describe("FileUtils.downloadFile()", function() {
     it("should fail if http request fails with error", function(done) {
         fileIO.downloadFile('tmp', cmisFileProperties, function(err) {
             expect(err).toBe("some error");
+            // should note change version in registry
+            expect(versionRegistry.hasVersion("nodeId", "1.2")).toBeTruthy();
             // TODO test st out - error message
             done();
         });
