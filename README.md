@@ -20,40 +20,19 @@ where
 
 ### Usage Examples
 
-```
-grunt cmiscopy
-```  
-will download all content of `$cmisRoot` to `$localRoot`
+* ```grunt cmiscopy```  will download all content of `$cmisRoot` to `$localRoot`
 
-```
-grunt cmiscopy:pages
-```
-will download `$cmisRoot/pages` folder with it's sub-folders to `$localRoot/pages`
+* ```grunt cmiscopy:pages``` will download `$cmisRoot/pages` folder with it's sub-folders to `$localRoot/pages`
 
-```
-grunt cmiscopy:pages:l
-```
-will list all documents in `$cmisRoot/pages` folder
+* ```grunt cmiscopy:pages:l``` will list all documents in `$cmisRoot/pages` folder
 
-```
-grunt cmiscopy::l
-```
-will list all documents in `$cmisRoot` folder
+* ```grunt cmiscopy::l``` will list all documents in `$cmisRoot` folder
 
-```
-grunt cmiscopy:pages:u
-```
-will upload local `$localRoot/pages` to CMS `$cmisRoot/pages`
+* ```grunt cmiscopy:pages:u``` will upload local `$localRoot/pages` to CMS `$cmisRoot/pages`
 
-```
-grunt cmiscopy:pages/faq.html
-```
-will download `$cmisRoot/pages/faq.html` file to local `$localRoot/pages/faq.html`
+* ```grunt cmiscopy:pages/faq.html``` will download `$cmisRoot/pages/faq.html` file to local `$localRoot/pages/faq.html`
 
-```
-grunt cmiscopy:pages/faq.html:u
-```
-will upload local `$localRoot/pages/faq.html` to `$cmisRoot/pages/faq.html`
+* ```grunt cmiscopy:pages/faq.html:u``` will upload local `$localRoot/pages/faq.html` to `$cmisRoot/pages/faq.html`
 
 
 ## Getting Started
