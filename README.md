@@ -8,83 +8,7 @@ It can be used to author content (download - edit - upload), to list documents o
 
 > __Note: *Starting from version 0.2.0 it will not overwrite files with the same content. Simply download (or upload) the whole directory and only changed files will be updated.*__
 
-##### download all content (of configured `cmisRoot` folder):
-```
-grunt cmiscopy
-```  
-
-##### download file or entire folder denoted by `cmisRoot/path`:
-```
-grunt cmiscopy:path
-```
-
-##### upload `cmisRoot/path` file or entire folder to CMIS repo:
-```
-grunt cmiscopy:path:u
-```
-
-##### list all documents in `cmisRoot/path`:
-```
-grunt cmiscopy:path:l
-```
-
-##### list all documents in `cmisRoot`:
-```
-grunt cmiscopy::l
-```
-
-## Getting Started
-This plugin requires Grunt `~0.4.2`
-
-If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
-
-```shell
-npm install grunt-cmiscopy --save-dev
-```
-
-Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
-
-```js
-grunt.loadNpmTasks('grunt-cmiscopy');
-```
-
-## Configuration
-
-
-In your project's Gruntfile, add a section named `cmiscopy` to the data object passed into `grunt.initConfig()`.
-
-```js
-grunt.initConfig({
-  cmiscopy: {
-    options: {
-        url: 'http://cmis.alfresco.com/cmisbrowser',
-        cmisRoot: '/Sites/mysite',
-        localRoot: 'mysite',
-        username: 'admin',
-        password: 'admin'
-    }
-  },
-});
-```
-
-### Options
-
-##### options.url
-A url to connect to your CMS
-
-##### options.cmisRoot
-The root folder in CMS that will be mapped to the local folder
-
-##### options.localRoot
-The local folder `cmisRoot` is mapped to
-
-##### options.username
-username to be used when authenticating with CMS
-
-##### options.password
-password to be used when authenticating with CMS
-
-## Command Line Arguments
+## Usage
 `grunt cmiscopy` takes two optional command line parametes - path and action: `grunt cmiscopy:path:action`
 where 
 - `path` is path to file or folder in CMS relative to `options.cmisRoot`
@@ -130,6 +54,58 @@ will download `$cmisRoot/pages/faq.html` file to local `$localRoot/pages/faq.htm
 grunt cmiscopy:pages/faq.html:u
 ```
 will upload local `$localRoot/pages/faq.html` to `$cmisRoot/pages/faq.html`
+
+
+## Getting Started
+This plugin requires Grunt `~0.4.2`
+
+Install this plugin with this command:
+
+```shell
+npm install grunt-cmiscopy --save-dev
+```
+
+Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
+
+```js
+grunt.loadNpmTasks('grunt-cmiscopy');
+```
+
+## Configuration
+
+In your project's Gruntfile, add a section named `cmiscopy` to the data object passed into `grunt.initConfig()`.
+
+```js
+grunt.initConfig({
+  cmiscopy: {
+    options: {
+        url: 'http://cmis.alfresco.com/cmisbrowser',
+        cmisRoot: '/Sites/mysite',
+        localRoot: 'mysite',
+        username: 'admin',
+        password: 'admin'
+    }
+  },
+});
+```
+
+### Options
+
+##### options.url
+A url to connect to your CMS
+
+##### options.cmisRoot
+The root folder in CMS that will be mapped to the local folder
+
+##### options.localRoot
+The local folder `cmisRoot` is mapped to
+
+##### options.username
+username to be used when authenticating with CMS
+
+##### options.password
+password to be used when authenticating with CMS
+
 
 ## Limitations:
 - it will not create new content in CMS
