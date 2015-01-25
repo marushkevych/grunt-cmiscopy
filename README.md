@@ -8,16 +8,6 @@ It can be used to author content (download - edit - upload), to list documents o
 
 > __Note: *Starting from version 0.2.0 it will not overwrite files with the same content. Simply download (or upload) the whole directory and only changed files will be updated.*__
 
-## Usage
-`grunt cmiscopy` takes two optional command line parametes - path and action: `grunt cmiscopy:path:action`
-where 
-- `path` is path to file or folder in CMS relative to `options.cmisRoot`
-- `action` is an action flag. Supported actions:
-    - `download` or `d` (default)
-    - `upload` or `u`
-    - `list` or `l` - list all objects in folder recursively
-
-
 ## Install
 
 Install this plugin with this command:
@@ -31,6 +21,18 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 ```js
 grunt.loadNpmTasks('grunt-cmiscopy');
 ```
+
+## Usage
+`grunt cmiscopy` takes two optional command line parametes - path and action: `grunt cmiscopy:path:action`
+where 
+- `path` is path to file or folder in CMS relative to `options.cmisRoot`
+- `action` is an action flag. Supported actions:
+    - `download` or `d` (default)
+    - `upload` or `u`
+    - `list` or `l` - list all objects in folder recursively
+
+
+
 
 ### Usage Examples
 
