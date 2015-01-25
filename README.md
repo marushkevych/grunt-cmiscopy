@@ -18,6 +18,20 @@ where
     - `list` or `l` - list all objects in folder recursively
 
 
+## Install
+
+Install this plugin with this command:
+
+```shell
+npm install grunt-cmiscopy --save-dev
+```
+
+Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
+
+```js
+grunt.loadNpmTasks('grunt-cmiscopy');
+```
+
 ### Usage Examples
 
 * ```grunt cmiscopy```  will download all content of `$cmisRoot` to `$localRoot`
@@ -35,20 +49,6 @@ where
 * ```grunt cmiscopy:pages/faq.html:u``` will upload local `$localRoot/pages/faq.html` to `$cmisRoot/pages/faq.html`
 
 
-## Getting Started
-This plugin requires Grunt `~0.4.2`
-
-Install this plugin with this command:
-
-```shell
-npm install grunt-cmiscopy --save-dev
-```
-
-Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
-
-```js
-grunt.loadNpmTasks('grunt-cmiscopy');
-```
 
 ## Configuration
 
