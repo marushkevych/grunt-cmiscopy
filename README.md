@@ -23,7 +23,10 @@ grunt.loadNpmTasks('grunt-cmiscopy');
 ```
 
 ## Usage
-`grunt cmiscopy` takes two optional command line parametes - path and action: `grunt cmiscopy:path:action`
+`grunt cmiscopy` takes two optional command line parametes - path and action: 
+```
+grunt cmiscopy:path:action
+```
 where 
 - `path` is path to file or folder in CMS relative to `options.cmisRoot`
 - `action` is an action flag. Supported actions:
